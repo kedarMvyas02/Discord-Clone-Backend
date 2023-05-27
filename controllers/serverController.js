@@ -21,7 +21,7 @@ const createServer = asyncHandler(async (req, res, next) => {
     avatar,
   });
 
-  if (!created) return next(new AppError("Something went wrong", 500));
+  if (!created) return next(new AppError("Server didn't created", 500));
 
   return res.status(201).json({
     message: "Server Created Successfully",
@@ -54,7 +54,7 @@ const updateServer = asyncHandler(async (req, res, next) => {
     { new: true }
   );
 
-  if (!updated) return next(new AppError("Something went wrong", 500));
+  if (!updated) return next(new AppError("Server didn't updated", 500));
 
   return res.status(200).json({
     message: "Server Updated Successfully",
@@ -87,7 +87,7 @@ const deleteServer = asyncHandler(async (req, res, next) => {
       message: "Server has been deleted successfully",
     });
   } else {
-    return next(new AppError("Something went wrong", 500));
+    return next(new AppError("Server has not been deleted", 500));
   }
 });
 

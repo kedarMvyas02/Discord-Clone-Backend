@@ -4,6 +4,7 @@ const textChannelSchema = new mongoose.Schema(
   {
     name: {
       type: String,
+      lowercase: true,
       required: [true, "Please add the Channel name"],
     },
     server: {

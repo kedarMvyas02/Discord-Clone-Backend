@@ -7,7 +7,6 @@ const User = require("../models/userModel");
 
 const detailValidation = asyncHandler(async (req, res, next) => {
   const { name, email, password, passwordConfirm } = req.body;
-
   let missingValues = [];
 
   if (!name) missingValues.push("Name ");
@@ -50,6 +49,7 @@ const detailValidation = asyncHandler(async (req, res, next) => {
   if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
     return next(new AppError("Email address is not valid", 400));
   }
+
   next();
 });
 
