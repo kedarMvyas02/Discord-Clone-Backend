@@ -26,7 +26,7 @@ const createTextChannel = asyncHandler(async (req, res, next) => {
       )
     );
 
-  const channelExists = await TextChannel.find({ name });
+  const channelExists = await TextChannel.find({ name, server: id });
   if (channelExists.length > 0)
     return next(new AppError("Channel Name is taken", 400));
 
@@ -73,7 +73,17 @@ const deleteTextChannel = asyncHandler(async (req, res, next) => {
 
 ////////////////////////////////////////////////////// GET TEXT CHANNEL ////////////////////////////////////////////////////////////////////////////////
 
-const getTextChannel = asyncHandler(async (req, res, next) => {});
+const getTextChannel = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+
+  const server = await Server.findById(id);
+  if (!server) return next(new AppError("Server not found", 404));
+
+  const textChannels = await TextChannel.find({ server: server._id });
+  return res.status(200).json({
+    textChannels,
+  });
+});
 
 module.exports = {
   createTextChannel,

@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 
 const validateToken = asyncHandler(async (req, res, next) => {
-  const temp = req.headers.Authorization || req.headers.authorization;
+  const temp = req.headers.authorization;
 
   if (temp && temp.startsWith("Bearer")) {
     const token = temp.split(" ")[1];

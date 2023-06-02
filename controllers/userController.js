@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const sendEmail = require("../config/nodemailer");
 const crypto = require("crypto");
 const User = require("../models/userModel");
+const Server = require("../models/serverModel");
 
 // generates a random token for forgot password functionality
 const generateToken = () => {
@@ -43,14 +44,13 @@ const registerUser = asyncHandler(async (req, res, next) => {
   });
 
   if (user) {
-    // sending email as registered successfully
-
-    const message = `Hey ${user.name}, \n You have successfully registered in our Medical App :) \n  Thanks a lot xD for registering into our application`;
+    const message = `Hey ${user.name}, \n You have successfully registered in Discord chatting application :) \n  Thanks a lot xD for registering into our application`;
 
     try {
       await sendEmail({
         email: user.email,
-        subject: "You have successfully registered into Medical Application",
+        subject:
+          "You have successfully registered into Discord clone by Kedar Vyas",
         message,
       });
 
@@ -88,6 +88,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
     const accessToken = await JWTokenGenerator(user);
     return res.status(200).json({
       message: "You have successfully logged in :) ",
+      _id: user._id,
       accessToken,
     });
   } else {
@@ -148,10 +149,7 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
     passwordResetToken: tokenDB,
   });
 
-  const resetURL = `${req.protocol}://${req.get(
-    "host"
-  )}/users/resetPassword/${resetToken}`;
-
+  const resetURL = `http://127.0.0.1:3000/resetPassword/${resetToken}`;
   const message = `Hey ${user.name}, \n Forgot your password? Don't Worry :) \n Submit a PATCH request with your new password to: ${resetURL} \n If you didn't forget your password, please ignore this email ! `;
 
   try {

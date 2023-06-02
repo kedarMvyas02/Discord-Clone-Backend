@@ -6,10 +6,6 @@ const serverSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please add the Server name"],
     },
-    channels: {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "Channel",
-    },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -19,14 +15,30 @@ const serverSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please add an Image"],
     },
-    users: {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "User",
-    },
   },
   {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
     timestamps: true,
   }
 );
+
+serverSchema.virtual("members", {
+  ref: "Member",
+  localField: "_id",
+  foreignField: "server",
+});
+
+serverSchema.virtual("textChannels", {
+  ref: "TextChannel",
+  localField: "_id",
+  foreignField: "server",
+});
+
+serverSchema.virtual("voiceChannels", {
+  ref: "VoiceChannel",
+  localField: "_id",
+  foreignField: "server",
+});
 
 module.exports = new mongoose.model("Server", serverSchema);
