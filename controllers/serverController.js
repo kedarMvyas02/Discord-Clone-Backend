@@ -16,26 +16,21 @@ const createServer = asyncHandler(async (req, res, next) => {
     api_key: process.env.CLOUD_API_KEY,
     api_secret: process.env.CLOUD_API_SECRET,
   });
-  const { name } = req.body;
+  const { name, avatar } = req.body;
   if (!name) return next(new AppError("please write name of the server", 400));
-  console.log("I was here");
-  if (!req.files) {
-    return next(new AppError("Avatar File is missing", 400));
-  }
-  const imagePath = req.files.avatar;
-  console.log(imagePath);
+  if (!avatar) return next(new AppError("please add an image", 400));
 
   const serverExists = await Server.find({ name, owner: req.user.id });
   if (serverExists.length > 0)
     return next(new AppError("Server Already Exists"), 405);
 
-  const uploadResult = await cloudinary.uploader.upload(imagePath[0].path);
-  const avatarUrl = uploadResult.secure_url;
+  // const uploadResult = await cloudinary.uploader.upload(imagePath[0].path);
+  // const avatarUrl = uploadResult.secure_url;
 
   const newServer = await Server.create({
     name,
     owner: req.user.id,
-    avatar: avatarUrl,
+    avatar,
   });
 
   await Member.create({

@@ -7,6 +7,7 @@ const sendEmail = require("../config/nodemailer");
 const crypto = require("crypto");
 const User = require("../models/userModel");
 const Server = require("../models/serverModel");
+const Member = require("../models/memeberModel");
 
 // generates a random token for forgot password functionality
 const generateToken = () => {
@@ -35,12 +36,13 @@ const JWTokenGenerator = async (user) => {
 
 // register a user
 const registerUser = asyncHandler(async (req, res, next) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, userImage } = req.body;
 
   const user = await User.create({
     name,
     email,
     password,
+    userImage,
   });
 
   if (user) {
@@ -52,6 +54,11 @@ const registerUser = asyncHandler(async (req, res, next) => {
         subject:
           "You have successfully registered into Discord clone by Kedar Vyas",
         message,
+      });
+
+      await Member.create({
+        server: "647ac5284561c78fcf7ce1ce",
+        user: user._id,
       });
 
       return res.status(200).json({
