@@ -120,55 +120,61 @@ const deleteServer = asyncHandler(async (req, res, next) => {
 
 const getServer = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
-  let currServer;
+  // let currServer;
 
-  if (id) {
-    currServer = await Server.findById(id)
-      .populate({
-        path: "textChannels",
-        select: "name -_id -server",
-      })
-      .lean();
-    if (!currServer) return next(new AppError("Server not found", 404));
+  if (!id) return next(new AppError("No id in params", 400));
 
-    return res.status(200).json({
-      message: "Server found successfully",
-      server: currServer,
-    });
-  } else {
-    currServer = await Server.find()
-      .populate({
-        path: "textChannels",
-        select: "name -_id -server",
-      })
-      .populate({
-        path: "voiceChannels",
-        select: "name -_id -server",
-      })
-      .lean();
-    if (!currServer) return next(new AppError("No Server found", 404));
+  const currServer = await Server.findById(id)
+    .populate({
+      path: "textChannels",
+      select: "name _id -server",
+    })
+    .populate({
+      path: "voiceChannels",
+      select: "name _id -server",
+    })
+    .lean();
 
-    const allServers = currServer.map((server) => {
-      const {
-        createdAt,
-        updatedAt,
-        __v,
-        textChannels,
-        voiceChannels,
-        ...rest
-      } = server;
-      return {
-        ...rest,
-        textChannels: textChannels.map(({ name }) => name),
-        voiceChannels: voiceChannels.map(({ name }) => name),
-      };
-    });
+  if (!currServer) return next(new AppError("Server not found", 404));
 
-    return res.status(200).json({
-      message: "Server found successfully",
-      server: allServers,
-    });
-  }
+  return res.status(200).json({
+    message: "Server found successfully",
+    server: currServer,
+  });
+  // } else {
+  //   currServer = await Server.find()
+  //     .populate({
+  //       path: "textChannels",
+  //       select: "name -_id -server",
+  //     })
+  //     .populate({
+  //       path: "voiceChannels",
+  //       select: "name -_id -server",
+  //     })
+  //     .lean();
+  //   if (!currServer) return next(new AppError("No Server found", 404));
+
+  //   const allServers = currServer.map((server) => {
+  //     const {
+  //       createdAt,
+  //       updatedAt,
+  //       __v,
+  //       textChannels,
+  //       voiceChannels,
+  //       ...rest
+  //     } = server;
+  //     return {
+  //       ...rest,
+  //       textChannels: textChannels.map(({ name }) => name),
+  //       voiceChannels: voiceChannels.map(({ name }) => name),
+  //     };
+  //   });
+
+  //   return res.status(200).json({
+  //     message: "Server found successfully",
+  //     server: allServers,
+  //   });
+  // }
 });
 
 ////////////////////////////////////////////////////// GET SERVER DYNAMICALLY ////////////////////////////////////////////////////////////////////////////////

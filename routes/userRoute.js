@@ -12,5 +12,28 @@ router.get("/getUser/:id?", validateToken, userController.getUser);
 router.delete("/deleteUser", validateToken, userController.deleteUser);
 router.post("/forgotPassword", userController.forgotPassword);
 router.patch("/resetPassword/:token", userController.resetPassword);
+router.post(
+  "/sendFriendRequest",
+  validateToken,
+  userController.sendFriendRequest
+);
+router.post(
+  "/acceptFriendRequest",
+  validateToken,
+  userController.acceptFriendRequest
+);
+router.get("/getFriends", validateToken, userController.getFriends);
+router.get(
+  "/getPendingRequests",
+  validateToken,
+  userController.getPendingRequests
+);
+router.get(
+  "/getArrivedFriendRequests",
+  validateToken,
+  userController.getArrivedFriendRequests
+);
+router.post("/cancelFriendReq", validateToken, userController.cancelFriendReq);
+router.post("/rejectFriendReq", validateToken, userController.rejectFriendReq);
 
 module.exports = router;

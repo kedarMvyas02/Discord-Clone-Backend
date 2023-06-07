@@ -4,6 +4,7 @@ const textChannelController = require("../controllers/textChannelController");
 const voiceChannelController = require("../controllers/voiceChannelController");
 const validateToken = require("../middlewares/validateToken");
 const uploadPhoto = require("../middlewares/uploadPhoto");
+const messageController = require("../controllers/messageController");
 const router = express.Router();
 
 //////////////////////////////////////////////////////// SERVER ROUTES ///////////////////////////////////////////////////////////////////////////////
@@ -65,5 +66,9 @@ router.get(
   validateToken,
   voiceChannelController.getVoiceChannel
 );
+//////////////////////////////////////////////////////// SEND MESSAGE ROUTES /////////////////////////////////////////////////////////////////////////
+
+router.post("/sendMessage/:id?", validateToken, messageController.sendMessage);
+router.get("/getMessages/:id?", validateToken, messageController.getMessages);
 
 module.exports = router;

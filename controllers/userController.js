@@ -8,6 +8,7 @@ const crypto = require("crypto");
 const User = require("../models/userModel");
 const Server = require("../models/serverModel");
 const Member = require("../models/memeberModel");
+const Friend = require("../models/friendsModel");
 
 // generates a random token for forgot password functionality
 const generateToken = () => {
@@ -18,6 +19,19 @@ const hashToken = (token) => {
   const sha256 = crypto.createHash("sha256");
   sha256.update(token);
   return sha256.digest("hex");
+};
+
+// unique discord code generator
+const generateUniqueCode = async () => {
+  // Generates a random 4-digit number between 1000 and 9999
+  const code = Math.floor(1000 + Math.random() * 9000);
+  const codeInUse = await User.find({ uniqueCode: code });
+
+  if (codeInUse.length > 0) {
+    return generateUniqueCode();
+  } else {
+    return code;
+  }
 };
 
 // generates a jwtoken
@@ -37,9 +51,12 @@ const JWTokenGenerator = async (user) => {
 // register a user
 const registerUser = asyncHandler(async (req, res, next) => {
   const { name, email, password, userImage } = req.body;
+  const uniqueCode = await generateUniqueCode();
+  const username = name?.split(" ")?.join("")?.trim();
 
   const user = await User.create({
-    name,
+    name: username,
+    uniqueCode,
     email,
     password,
     userImage,
@@ -49,12 +66,12 @@ const registerUser = asyncHandler(async (req, res, next) => {
     const message = `Hey ${user.name}, \n You have successfully registered in Discord chatting application :) \n  Thanks a lot xD for registering into our application`;
 
     try {
-      await sendEmail({
-        email: user.email,
-        subject:
-          "You have successfully registered into Discord clone by Kedar Vyas",
-        message,
-      });
+      // await sendEmail({
+      //   email: user.email,
+      //   subject:
+      //     "You have successfully registered into Discord clone by Kedar Vyas",
+      //   message,
+      // });
 
       await Member.create({
         server: "647ac5284561c78fcf7ce1ce",
@@ -64,6 +81,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
       return res.status(200).json({
         message: "User successfully created",
         _id: user._id,
+        name: `${name}#${uniqueCode}`,
         email,
       });
     } catch (err) {
@@ -241,6 +259,196 @@ const getUser = asyncHandler(async (req, res, next) => {
   }
 });
 
+const sendFriendRequest = asyncHandler(async (req, res, next) => {
+  const { uniqueCode } = req.body;
+  const friend = await User.findOne({ uniqueCode });
+  if (!friend) return next(new AppError("Friend does not exist", 400));
+  if (req.user.uniqueCode == uniqueCode)
+    return next(
+      new AppError("You cannot send friend request to yourself", 400)
+    );
+  const requestExists = await Friend.findOne({
+    user: req.user.id,
+    friend: friend._id,
+    accepted: false,
+  });
+  if (requestExists)
+    return next(new AppError("Friend Request sent already!", 400));
+  const friendExists = await Friend.findOne({
+    user: req.user.id,
+    friend: friend._id,
+    accepted: true,
+  });
+  if (friendExists)
+    return next(new AppError("You both are friend already!", 400));
+
+  const done = await Friend.create({
+    user: req.user.id,
+    friend: friend._id,
+    accepted: false,
+  });
+
+  if (!done)
+    return next(new AppError("Something went wrong with friend model", 500));
+
+  return res.status(200).json({
+    msg: "Friend request sent successfully",
+  });
+});
+
+const acceptFriendRequest = asyncHandler(async (req, res, next) => {
+  const { uniqueCode } = req.body;
+
+  const friend = await User.findOne({ uniqueCode });
+  if (!friend) return next(new AppError("Friend does not exist", 400));
+
+  const requestExists = await Friend.findOne({
+    user: friend._id,
+    friend: req.user.id,
+    accepted: false,
+  });
+
+  if (!requestExists)
+    return next(new AppError("Friend Request does not exists", 400));
+
+  await Friend.findByIdAndUpdate(
+    { _id: requestExists._id },
+    {
+      accepted: true,
+    },
+    { new: true }
+  );
+
+  const done = await Friend.create({
+    user: req.user.id,
+    friend: friend._id,
+    accepted: true,
+  });
+
+  if (!done)
+    return next(new AppError("Something went wrong with friend model", 500));
+
+  return res.status(200).json({
+    msg: "You are friends now yayy!!!",
+  });
+});
+
+const getFriends = asyncHandler(async (req, res, next) => {
+  const friends = await Friend.find({ user: req.user.id, accepted: true })
+    .populate("user")
+    .populate("friend");
+
+  if (friends.length == 0)
+    return next(new AppError("you don't have any friends", 404));
+
+  console.log(friends);
+
+  const friendsNames = friends.map((friend) => ({
+    _id: friend.friend._id,
+    friend: friend.friend.name,
+    uniqueCode: friend.friend.uniqueCode,
+    userImage: friend.friend.userImage,
+  }));
+
+  return res.status(200).json({
+    allFriends: friendsNames,
+  });
+});
+
+const getPendingRequests = asyncHandler(async (req, res, next) => {
+  const user = await User.findOne({ _id: req.user.id });
+
+  const friends = await Friend.find({ user: user._id, accepted: false })
+    .populate("user")
+    .populate("friend");
+  if (friends.length == 0)
+    return next(new AppError("you don't have any pending requests", 404));
+
+  const friendsNames = friends.map((friend) => ({
+    _id: friend.friend._id,
+    friend: friend.friend.name,
+    uniqueCode: friend.friend.uniqueCode,
+    userImage: friend.friend.userImage,
+  }));
+
+  return res.status(200).json({
+    pendingReq: friendsNames,
+  });
+});
+
+const getArrivedFriendRequests = asyncHandler(async (req, res, next) => {
+  const user = await User.findOne({ _id: req.user.id });
+
+  const friends = await Friend.find({ friend: user._id, accepted: false })
+    .populate("user")
+    .populate("friend");
+  if (friends.length == 0)
+    return next(
+      new AppError("you don't have any arrived friend requests", 404)
+    );
+
+  const friendsNames = friends.map((friend) => ({
+    _id: friend.user._id,
+    user: friend.user.name,
+    uniqueCode: friend.user.uniqueCode,
+    userImage: friend.user.userImage,
+  }));
+
+  return res.status(200).json({
+    arrivedReq: friendsNames,
+  });
+});
+
+const rejectFriendReq = asyncHandler(async (req, res, next) => {
+  const { uniqueCode } = req.body;
+
+  const friend = await User.findOne({ uniqueCode });
+  if (!friend) return next(new AppError("Friend does not exist", 400));
+
+  const requestExists = await Friend.findOne({
+    user: friend._id,
+    friend: req.user.id,
+    accepted: false,
+  });
+
+  if (!requestExists)
+    return next(new AppError("Friend Request does not exists", 400));
+
+  const done = await Friend.findByIdAndDelete({ _id: requestExists._id });
+
+  if (!done)
+    return next(new AppError("Something went wrong with friend model", 500));
+
+  return res.status(200).json({
+    msg: "Friend Request Rejected Successfully",
+  });
+});
+
+const cancelFriendReq = asyncHandler(async (req, res, next) => {
+  const { uniqueCode } = req.body;
+
+  const friend = await User.findOne({ uniqueCode });
+  if (!friend) return next(new AppError("Friend does not exist", 400));
+
+  const requestExists = await Friend.findOne({
+    user: req.user.id,
+    friend: friend._id,
+    accepted: false,
+  });
+
+  if (!requestExists)
+    return next(new AppError("Friend Request does not exists", 400));
+
+  const done = await Friend.findByIdAndDelete({ _id: requestExists._id });
+
+  if (!done)
+    return next(new AppError("Something went wrong with friend model", 500));
+
+  return res.status(200).json({
+    msg: "Friend Request Deleted Successfully",
+  });
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -248,4 +456,11 @@ module.exports = {
   forgotPassword,
   resetPassword,
   getUser,
+  sendFriendRequest,
+  acceptFriendRequest,
+  getFriends,
+  getPendingRequests,
+  getArrivedFriendRequests,
+  rejectFriendReq,
+  cancelFriendReq,
 };

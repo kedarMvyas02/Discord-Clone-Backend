@@ -9,6 +9,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please add the user name"],
     },
+    uniqueCode: {
+      type: Number,
+    },
     email: {
       type: String,
       lowercase: true,
@@ -17,6 +20,8 @@ const userSchema = new mongoose.Schema(
     },
     userImage: {
       type: String,
+      default:
+        "http://res.cloudinary.com/dbi3rrybd/image/upload/v1686048004/Discord/gh1v9hotmsfjnbjnmltd.ico",
     },
     password: {
       type: String,

@@ -11,15 +11,9 @@ const messageSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please add the Channel name"],
     },
-    server: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Server",
-      //   required: [true, "Please add the server it belongs to"],
-    },
-    channels: {
+    channel: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: "Channel",
-      //   unique: [true, "This channel name already exists"],
     },
   },
   {
