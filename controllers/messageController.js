@@ -4,7 +4,7 @@ const { default: mongoose } = require("mongoose");
 const Member = require("../models/memeberModel");
 const TextChannel = require("../models/textChannelModel");
 const VoiceChannel = require("../models/voiceChannelModel");
-const Message = require("../models/messageModel");
+const Message = require("../models/OneToOneMessageModel");
 require("dotenv").config();
 
 const sendMessage = asyncHandler(async (req, res, next) => {

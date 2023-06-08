@@ -35,5 +35,6 @@ router.get(
 );
 router.post("/cancelFriendReq", validateToken, userController.cancelFriendReq);
 router.post("/rejectFriendReq", validateToken, userController.rejectFriendReq);
+router.post("/removeFriend", validateToken, userController.removeFriend);
 
 module.exports = router;

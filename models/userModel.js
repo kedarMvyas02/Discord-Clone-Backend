@@ -28,6 +28,13 @@ const userSchema = new mongoose.Schema(
       required: [true, "Please fill the password field"],
     },
     passwordResetToken: { type: String },
+    socket_id: {
+      type: String,
+    },
+    status: {
+      type: String,
+      enum: ["Online", "Offline"],
+    },
   },
   {
     timestamps: true,

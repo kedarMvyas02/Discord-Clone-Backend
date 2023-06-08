@@ -5,6 +5,7 @@ const voiceChannelController = require("../controllers/voiceChannelController");
 const validateToken = require("../middlewares/validateToken");
 const uploadPhoto = require("../middlewares/uploadPhoto");
 const messageController = require("../controllers/messageController");
+const dmController = require("../controllers/DmController");
 const router = express.Router();
 
 //////////////////////////////////////////////////////// SERVER ROUTES ///////////////////////////////////////////////////////////////////////////////
@@ -70,5 +71,15 @@ router.get(
 
 router.post("/sendMessage/:id?", validateToken, messageController.sendMessage);
 router.get("/getMessages/:id?", validateToken, messageController.getMessages);
+
+//////////////////////////////////////////////////////// SEND MESSAGE ROUTES /////////////////////////////////////////////////////////////////////////
+
+router.post("/addToDm/:id?", validateToken, dmController.addToDmHandler);
+router.post(
+  "/removeFromDm/:id?",
+  validateToken,
+  dmController.removeFromDmHandler
+);
+router.get("/getDmFriends", validateToken, dmController.getDmFriends);
 
 module.exports = router;

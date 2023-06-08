@@ -9,6 +9,7 @@ const User = require("../models/userModel");
 const Server = require("../models/serverModel");
 const Member = require("../models/memeberModel");
 const Friend = require("../models/friendsModel");
+const Dm = require("../models/DmModel");
 
 // generates a random token for forgot password functionality
 const generateToken = () => {
@@ -341,8 +342,6 @@ const getFriends = asyncHandler(async (req, res, next) => {
   if (friends.length == 0)
     return next(new AppError("you don't have any friends", 404));
 
-  console.log(friends);
-
   const friendsNames = friends.map((friend) => ({
     _id: friend.friend._id,
     friend: friend.friend.name,
@@ -449,6 +448,41 @@ const cancelFriendReq = asyncHandler(async (req, res, next) => {
   });
 });
 
+const removeFriend = asyncHandler(async (req, res, next) => {
+  const { uniqueCode } = req.body;
+
+  const friend = await User.findOne({ uniqueCode });
+  if (!friend) return next(new AppError("Friend does not exist", 400));
+
+  const requestExists = await Friend.findOne({
+    user: req.user.id,
+    friend: friend._id,
+    accepted: true,
+  });
+
+  if (!requestExists) return next(new AppError("Friend does not exists", 400));
+
+  const requestExists2 = await Friend.findOne({
+    user: friend._id,
+    friend: req.user.id,
+    accepted: true,
+  });
+
+  await Friend.findByIdAndDelete({ _id: requestExists._id });
+  await Friend.findByIdAndDelete({ _id: requestExists2._id });
+  const done = await Dm.deleteOne({
+    user: friend._id,
+    friend: req.user.id,
+  });
+
+  if (!done)
+    return next(new AppError("Something went wrong with friend model", 500));
+
+  return res.status(200).json({
+    msg: "Friend was Removed Successfully",
+  });
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -463,4 +497,5 @@ module.exports = {
   getArrivedFriendRequests,
   rejectFriendReq,
   cancelFriendReq,
+  removeFriend,
 };
