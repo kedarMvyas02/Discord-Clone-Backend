@@ -6,6 +6,7 @@ const validateToken = require("../middlewares/validateToken");
 const uploadPhoto = require("../middlewares/uploadPhoto");
 const messageController = require("../controllers/messageController");
 const dmController = require("../controllers/DmController");
+const OneToOneChatController = require("../controllers/OneToOneChatController");
 const router = express.Router();
 
 //////////////////////////////////////////////////////// SERVER ROUTES ///////////////////////////////////////////////////////////////////////////////
@@ -72,7 +73,7 @@ router.get(
 router.post("/sendMessage/:id?", validateToken, messageController.sendMessage);
 router.get("/getMessages/:id?", validateToken, messageController.getMessages);
 
-//////////////////////////////////////////////////////// SEND MESSAGE ROUTES /////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////// DM ROUTES /////////////////////////////////////////////////////////////////////////
 
 router.post("/addToDm/:id?", validateToken, dmController.addToDmHandler);
 router.post(
@@ -81,5 +82,13 @@ router.post(
   dmController.removeFromDmHandler
 );
 router.get("/getDmFriends", validateToken, dmController.getDmFriends);
+
+//////////////////////////////////////////////////////// DM ROUTES /////////////////////////////////////////////////////////////////////////
+
+router.get(
+  "/getDmMessages/:id?",
+  validateToken,
+  OneToOneChatController.getDmMessages
+);
 
 module.exports = router;

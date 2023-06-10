@@ -4,88 +4,108 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const User = require("./models/userModel");
 const OneToOneMessage = require("./models/OneToOneMessageModel");
+const AppError = require("./ErrorHandlers/AppError");
+const Dm = require("./models/DmModel");
 //////////////////////////////////////////////////////////////////////////////////
 
-// const io = new Server(server, {
-//   cors: {
-//     origin: "*",
-//     methods: ["GET", "POST"],
-//   },
-// });
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
 
-// io.on("connection", async (socket) => {
-//   const user_id = socket.handshake.query.user_id;
-//   const dmId = socket.handshake.query.dmId;
-//   console.log("user_id", user_id);
-//   console.log("dmId", dmId);
+const allUsers = new Map();
 
-//   // console.log(`User connected ${socket.id}`);
+io.on("connection", async (socket) => {
+  // const user_id = socket.handshake.query.user_id;
+  // const dmId = socket.handshake.query.dmId;
 
-//   if (user_id != null && Boolean(user_id)) {
-//     try {
-//       const user = await User.findByIdAndUpdate(user_id, {
-//         socket_id: socket.id,
-//         status: "Online",
-//       });
-//       // console.log(user);
-//     } catch (e) {
-//       // console.log("error che", e);
-//     }
-//   }
+  socket.on("add-user", (user_id) => {
+    allUsers.set(user_id.user_id, socket.id);
+    console.log(allUsers);
+  });
 
-//   // Handle incoming text/link messages
-//   socket.on("text_message", async (data) => {
-//     console.log("Received message:", data);
+  // Handle incoming text messages
+  socket.on("text_message", async (data) => {
+    const { from, to, message } = data;
 
-//     // data: {to, from, text}
+    const from_user = await User.findById(from); // req.user
+    const to_user = await User.findById(to); // friend
 
-//     const { from, to, message } = data;
+    // const dmExist = Dm.findOne({
+    //   user: to_user, // friend
+    //   friend: from_user, // req.user
+    // });
 
-//     const to_user = await User.findById(to);
-//     const from_user = await User.findById(from);
+    // if (!dmExist) {
+    //   await Dm.create({
+    //     user: to_user, // friend
+    //     friend: from_user, // req.user
+    //   });
 
-//     // message => {to, from, type, created_at, text, file}
+    //   const dmFriends = await Dm.find({ to_user }).populate("user").lean();
+    //   if (!dmFriends) return next(new AppError(`No user exist in your dm`));
 
-//     const new_message = {
-//       to: to,
-//       from: from,
-//       // created_at: Date.now(),
-//       text: message,
-//     };
+    //   const data = dmFriends.map((item) => {
+    //     const { name, uniqueCode, email, userImage, _id } = item.friend;
+    //     return { _id, name, uniqueCode, email, userImage };
+    //   });
 
-//     const chat = await OneToOneMessage.create({
-//       reciever: to_user._id,
-//       sender: from_user._id,
-//       text: message,
-//     });
+    //   io.emit("got_dm_friends", data);
+    // }
+    let populatedChat;
 
-//     console.log("TO socket id", to_user?.socket_id);
-//     io.to(to_user?.socket_id).emit("new_message", {
-//       chat,
-//       message: new_message,
-//     });
+    try {
+      const chat = await OneToOneMessage.create({
+        reciever: to_user._id,
+        sender: from_user._id,
+        content: message,
+      });
 
-//     // emit outgoing_message -> from user
-//     console.log("FROM socket id", from_user?.socket_id);
-//     console.log("MARI ID", socket.id);
-//     io.to(from_user?.socket_id).emit("new_message", {
-//       chat,
-//       message: new_message,
-//     });
-//   });
+      populatedChat = await OneToOneMessage.populate(chat, [
+        {
+          path: "sender",
+          select: "name _id uniqueCode email userImage status createdAt",
+        },
+        {
+          path: "reciever",
+          select: "name _id uniqueCode email userImage status createdAt",
+        },
+      ]);
+    } catch (error) {
+      console.log(error);
+    }
 
-//   socket.on("end", async (data) => {
-//     // Find user by ID and set status as offline
-//     if (data.user_id) {
-//       await User.findByIdAndUpdate(data.user_id, { status: "Offline" });
-//     }
+    const toSocketId = allUsers.get(to);
+    console.log(toSocketId);
 
-//     // broadcast to all conversation rooms of this user that this user is offline (disconnected)
+    if (toSocketId) {
+      io.to(toSocketId).emit("navoMessage", {
+        populatedChat,
+      });
+    }
+  });
 
-//     console.log("closing connection");
-//     socket.disconnect(0);
-//   });
-// });
+  //============= SERVER CHATTING ==============
+  socket.on("join-room", (roomName) => {
+    socket.join(roomName);
+    socket.on("channel-message");
+    socket.emit("message", message);
+  });
+
+  socket.on("end", async (data) => {
+    // Find user by ID and set status as offline
+    if (data.user_id) {
+      await User.findByIdAndUpdate(data.user_id, { status: "Offline" });
+    }
+
+    // broadcast to all conversation rooms of this user that this user is offline (disconnected)
+
+    console.log("closing connection");
+    socket.disconnect(0);
+  });
+});
 //////////////////////////////////////////////////////////////////////////////////
 
 server.listen(process.env.PORT, () => {

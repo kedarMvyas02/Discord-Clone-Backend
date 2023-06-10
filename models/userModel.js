@@ -28,13 +28,6 @@ const userSchema = new mongoose.Schema(
       required: [true, "Please fill the password field"],
     },
     passwordResetToken: { type: String },
-    socket_id: {
-      type: String,
-    },
-    status: {
-      type: String,
-      enum: ["Online", "Offline"],
-    },
   },
   {
     timestamps: true,
@@ -47,4 +40,5 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-module.exports = new mongoose.model("User", userSchema);
+const User = new mongoose.model("User", userSchema);
+module.exports = User;

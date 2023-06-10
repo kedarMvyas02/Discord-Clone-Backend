@@ -26,4 +26,5 @@ memberSchema.virtual("servers", {
   foreignField: "_id",
 });
 
-module.exports = new mongoose.model("Member", memberSchema);
+const Member = new mongoose.model("Member", memberSchema);
+module.exports = Member;

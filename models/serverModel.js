@@ -41,4 +41,5 @@ serverSchema.virtual("voiceChannels", {
   foreignField: "server",
 });
 
-module.exports = new mongoose.model("Server", serverSchema);
+const Server = new mongoose.model("Server", serverSchema);
+module.exports = Server;

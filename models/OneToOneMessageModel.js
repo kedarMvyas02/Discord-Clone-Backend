@@ -4,11 +4,13 @@ const oneToOneMessage = new mongoose.Schema(
   {
     sender: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
     reciever: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
-    text: {
+    content: {
       type: String,
     },
   },
@@ -17,4 +19,5 @@ const oneToOneMessage = new mongoose.Schema(
   }
 );
 
-module.exports = new mongoose.model("OneToOneMessage", oneToOneMessage);
+const OneToOneMessage = new mongoose.model("OneToOneMessage", oneToOneMessage);
+module.exports = OneToOneMessage;

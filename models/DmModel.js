@@ -20,4 +20,5 @@ const dmSchema = new mongoose.Schema(
   }
 );
 
-module.exports = new mongoose.model("Dm", dmSchema);
+const Dm = new mongoose.model("Dm", dmSchema);
+module.exports = Dm;
