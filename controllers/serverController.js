@@ -222,13 +222,16 @@ const getJoinedServers = asyncHandler(async (req, res, next) => {
 
 const joinServer = asyncHandler(async (req, res, next) => {
   const serverId = req.params.id;
-  const user = req.params.userId;
+  const user = req.user.id;
   const servers = await Server.findById(serverId);
   if (!servers) return next(new AppError("server not found", 404));
-  if (!user) return next(new AppError("user not found", 404));
 
-  if (user.toString() !== req.user.id)
-    return next(new AppError("You cannot join through another user's i'd"));
+  const joinedServers = await Member.findOne({
+    user: req.user.id,
+    server: serverId,
+  });
+  if (joinedServers)
+    return next(new AppError("You have already joined this server", 400));
 
   const joined = await Member.create({
     server: serverId,
@@ -249,13 +252,9 @@ const joinServer = asyncHandler(async (req, res, next) => {
 
 const leaveServer = asyncHandler(async (req, res, next) => {
   const serverId = req.params.id;
-  const user = req.params.userId;
+  const user = req.user.id;
   const servers = await Server.findById(serverId);
   if (!servers) return next(new AppError("server not found", 404));
-  if (!user) return next(new AppError("user not found", 404));
-
-  if (user.toString() !== req.user.id)
-    return next(new AppError("You cannot join through another user's i'd"));
 
   const joinedServers = await Member.findOne({
     user: req.user.id,
@@ -288,12 +287,3 @@ module.exports = {
   joinServer,
   leaveServer,
 };
-
-/*
-get all server members to display
- const serverMembers = await Server.find()
-    .populate({
-      path: "members",
-      select: "name -_id",
-    })
-*/

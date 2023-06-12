@@ -6,6 +6,9 @@ const User = require("./models/userModel");
 const OneToOneMessage = require("./models/OneToOneMessageModel");
 const AppError = require("./ErrorHandlers/AppError");
 const Dm = require("./models/DmModel");
+const GroupMessage = require("./models/GroupMessageModel");
+const Member = require("./models/memeberModel");
+const { default: mongoose } = require("mongoose");
 //////////////////////////////////////////////////////////////////////////////////
 
 const io = new Server(server, {
@@ -21,8 +24,8 @@ io.on("connection", async (socket) => {
   // const user_id = socket.handshake.query.user_id;
   // const dmId = socket.handshake.query.dmId;
 
-  socket.on("add-user", (user_id) => {
-    allUsers.set(user_id.user_id, socket.id);
+  socket.on("add-user", ({ user_id }) => {
+    allUsers.set(user_id, socket.id);
     console.log(allUsers);
   });
 
@@ -33,29 +36,18 @@ io.on("connection", async (socket) => {
     const from_user = await User.findById(from); // req.user
     const to_user = await User.findById(to); // friend
 
-    // const dmExist = Dm.findOne({
-    //   user: to_user, // friend
-    //   friend: from_user, // req.user
-    // });
+    const dmExist = await Dm.findOne({
+      user: to_user, // friend
+      friend: from_user, // req.user
+    });
+    if (!dmExist) {
+      await Dm.create({
+        user: to_user, // friend
+        friend: from_user, // req.user
+      });
+    }
 
-    // if (!dmExist) {
-    //   await Dm.create({
-    //     user: to_user, // friend
-    //     friend: from_user, // req.user
-    //   });
-
-    //   const dmFriends = await Dm.find({ to_user }).populate("user").lean();
-    //   if (!dmFriends) return next(new AppError(`No user exist in your dm`));
-
-    //   const data = dmFriends.map((item) => {
-    //     const { name, uniqueCode, email, userImage, _id } = item.friend;
-    //     return { _id, name, uniqueCode, email, userImage };
-    //   });
-
-    //   io.emit("got_dm_friends", data);
-    // }
     let populatedChat;
-
     try {
       const chat = await OneToOneMessage.create({
         reciever: to_user._id,
@@ -88,10 +80,48 @@ io.on("connection", async (socket) => {
   });
 
   //============= SERVER CHATTING ==============
-  socket.on("join-room", (roomName) => {
-    socket.join(roomName);
-    socket.on("channel-message");
-    socket.emit("message", message);
+
+  socket.on("channel-message", async (data) => {
+    const { from, to, server, message } = data;
+    const from_user = await User.findById(from); // req.user
+
+    let populatedChat;
+    try {
+      const chat = await GroupMessage.create({
+        sender: from_user._id,
+        channel: to,
+        content: message,
+      });
+      populatedChat = await GroupMessage.populate(chat, [
+        {
+          path: "sender",
+          select: "name _id uniqueCode email userImage status createdAt",
+        },
+        {
+          path: "channel",
+          select: "_id name",
+        },
+      ]);
+    } catch (error) {
+      console.log(error);
+    }
+
+    const serverMembers = await Member.find({ server });
+
+    let temp = [];
+    serverMembers.map((item) => {
+      const userId = item.user.toString();
+      const userToken = allUsers.get(userId);
+      temp.push(userToken);
+    });
+
+    if (temp) {
+      temp.forEach((item) => {
+        io.to(item).emit("message", {
+          populatedChat,
+        });
+      });
+    }
   });
 
   socket.on("end", async (data) => {

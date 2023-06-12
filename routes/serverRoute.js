@@ -4,9 +4,9 @@ const textChannelController = require("../controllers/textChannelController");
 const voiceChannelController = require("../controllers/voiceChannelController");
 const validateToken = require("../middlewares/validateToken");
 const uploadPhoto = require("../middlewares/uploadPhoto");
-const messageController = require("../controllers/messageController");
 const dmController = require("../controllers/DmController");
 const OneToOneChatController = require("../controllers/OneToOneChatController");
+const GroupMessageController = require("../controllers/groupMessageController");
 const router = express.Router();
 
 //////////////////////////////////////////////////////// SERVER ROUTES ///////////////////////////////////////////////////////////////////////////////
@@ -29,8 +29,8 @@ router.delete(
 );
 router.get("/getServer/:id?", validateToken, serverController.getServer);
 
-router.post("/:id/join/:userId", validateToken, serverController.joinServer);
-router.post("/:id/leave/:userId", validateToken, serverController.leaveServer);
+router.post("/join/:id", validateToken, serverController.joinServer);
+router.post("/leave/:id", validateToken, serverController.leaveServer);
 
 router.get("/joinedServers", validateToken, serverController.getJoinedServers);
 
@@ -68,10 +68,13 @@ router.get(
   validateToken,
   voiceChannelController.getVoiceChannel
 );
-//////////////////////////////////////////////////////// SEND MESSAGE ROUTES /////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////// CHANNEL MESSAGE ROUTES /////////////////////////////////////////////////////////////////////////
 
-router.post("/sendMessage/:id?", validateToken, messageController.sendMessage);
-router.get("/getMessages/:id?", validateToken, messageController.getMessages);
+router.get(
+  "/getChannelMessages/:id?",
+  validateToken,
+  GroupMessageController.getChannelMessages
+);
 
 //////////////////////////////////////////////////////// DM ROUTES /////////////////////////////////////////////////////////////////////////
 
