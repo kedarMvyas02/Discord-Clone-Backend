@@ -64,15 +64,95 @@ const registerUser = asyncHandler(async (req, res, next) => {
   });
 
   if (user) {
-    const message = `Hey ${user.name}, \n You have successfully registered in Discord chatting application :) \n  Thanks a lot xD for registering into our application`;
+    // const message = `Hey ${user.name}, \n You have successfully registered in Discord chatting application :) \n  Thanks a lot xD for registering into our application`;
+
+    const message = `
+  <html>
+    <head>
+      <style>
+        /* Add your custom CSS styles here */
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #f7f7f7;
+          padding: 20px;
+        }
+
+        .container {
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 20px;
+          background-color: #fff;
+          border-radius: 4px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+          text-align: center;
+          margin-bottom: 20px;
+        }
+
+        .logo {
+          width: 100px;
+          height: 100px;
+          margin-bottom: 10px;
+        }
+
+        .message {
+          margin-bottom: 20px;
+        }
+
+        
+.button_slide {
+  color: #FFF;
+  border: 2px solid rgb(216, 2, 134);
+  border-radius: 0px;
+  padding: 18px 36px;
+  display: inline-block;
+  font-family: "Lucida Console", Monaco, monospace;
+  font-size: 14px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 0 #D80286;
+  -webkit-transition: ease-out 0.4s;
+  -moz-transition: ease-out 0.4s;
+  transition: ease-out 0.4s;
+}
+
+.slide_right:hover {
+  box-shadow: inset 400px 0 0 0 #D80286;
+}
+
+</style>
+</head>
+<body>
+
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <img src="https://static.vecteezy.com/system/resources/previews/006/892/625/large_2x/discord-logo-icon-editorial-free-vector.jpg" alt="Discord Logo" class="logo">
+          <h1>Welcome to Discord Chatting Application</h1>
+        </div>
+        <div class="message">
+          <p>Hey ${user.name},</p>
+          <p>You have successfully registered in the Discord Chatting Application. Thank you for joining us!</p>
+        </div>
+        <p>If you have any questions or need assistance, feel free to reach out to our support team.</p>
+        <p>Happy chatting!</p>
+        <a href="http://127.0.0.1:3000/" class="button_slide slide_right">Open Discord</a>
+      </div>
+    </body>
+  </html>
+`;
 
     try {
-      // await sendEmail({
-      //   email: user.email,
-      //   subject:
-      //     "You have successfully registered into Discord clone by Kedar Vyas",
-      //   message,
-      // });
+      await sendEmail({
+        email: user.email,
+        subject:
+          "You have successfully registered into Discord clone by Kedar Vyas",
+        html: message,
+      });
 
       await Member.create({
         server: "647ac5284561c78fcf7ce1ce",
