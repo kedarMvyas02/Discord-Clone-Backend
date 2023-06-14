@@ -65,9 +65,101 @@ const getVoiceChannel = asyncHandler(async (req, res, next) => {
   });
 });
 
+////////////////////////////////////////////////////// JOIN VOICE CHANNEL ////////////////////////////////////////////////////////////////////////////////
+
+const joinVoiceChannel = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+
+  const channelExists = await VoiceChannel.findById(id);
+  if (!channelExists) return next(new AppError("Channel does not exists", 404));
+
+  if (channelExists.current.includes(req.user.id))
+    return next(new AppError("You have already joined this channel", 400));
+
+  const updated = await VoiceChannel.findByIdAndUpdate(
+    id,
+    { $push: { current: req.user.id } },
+    { new: true }
+  ).populate({
+    path: "current",
+    select: "name _id uniqueCode email userImage status createdAt",
+  });
+
+  if (!updated)
+    return next(
+      new AppError(
+        "Something went wrong while adding you inside voice channel",
+        500
+      )
+    );
+
+  return res.status(200).json({
+    msg: "You have successfully joined the channel",
+    updated,
+  });
+});
+
+////////////////////////////////////////////////////// LEAVE VOICE CHANNEL ////////////////////////////////////////////////////////////////////////////////
+
+const leaveVoiceChannel = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+
+  const channelExists = await VoiceChannel.findById(id);
+  if (!channelExists) return next(new AppError("Channel does not exists", 404));
+
+  if (!channelExists.current.includes(req.user.id))
+    return next(new AppError("You haven't joined the channel", 400));
+
+  const updated = await VoiceChannel.findByIdAndUpdate(
+    id,
+    { $pull: { current: req.user.id } },
+    { new: true }
+  ).populate({
+    path: "current",
+    select: "name _id uniqueCode email userImage status createdAt",
+  });
+
+  if (!updated)
+    return next(
+      new AppError(
+        "Something went wrong while leaving from the voice channel",
+        500
+      )
+    );
+
+  return res.status(200).json({
+    msg: "You have successfully left the channel",
+    updated,
+  });
+});
+
+////////////////////////////////////////////////////// LEAVE VOICE CHANNEL ////////////////////////////////////////////////////////////////////////////////
+
+const getJoinedInVoiceChannel = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+
+  const channelExists = await VoiceChannel.findById(id).populate({
+    path: "current",
+    select: "name _id uniqueCode email userImage status createdAt",
+  });
+
+  if (!channelExists) return next(new AppError("Channel does not exists", 404));
+  if (channelExists.current.length == 0)
+    return next(
+      new AppError("There are no members joined in the voice channel", 400)
+    );
+
+  return res.status(200).json({
+    joinedMembers: channelExists.current,
+  });
+});
+
 module.exports = {
   createVoiceChannel,
   updateVoiceChannel,
   deleteVoiceChannel,
   getVoiceChannel,
+  joinVoiceChannel,
+  leaveVoiceChannel,
+  getJoinedInVoiceChannel,
 };

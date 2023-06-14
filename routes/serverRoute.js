@@ -59,14 +59,29 @@ router.post(
   voiceChannelController.createVoiceChannel
 );
 router.delete(
-  "/deleteTextChannel/:id?",
+  "/deleteVoiceChannel/:id?",
   validateToken,
   voiceChannelController.deleteVoiceChannel
 );
 router.get(
-  "/getTextChannel/:id?",
+  "/getVoiceChannel/:id?",
   validateToken,
   voiceChannelController.getVoiceChannel
+);
+router.post(
+  "/joinVoiceChannel/:id?",
+  validateToken,
+  voiceChannelController.joinVoiceChannel
+);
+router.post(
+  "/leaveVoiceChannel/:id?",
+  validateToken,
+  voiceChannelController.leaveVoiceChannel
+);
+router.get(
+  "/getJoinedInVoiceChannel/:id?",
+  validateToken,
+  voiceChannelController.getJoinedInVoiceChannel
 );
 //////////////////////////////////////////////////////// CHANNEL MESSAGE ROUTES /////////////////////////////////////////////////////////////////////////
 
@@ -85,13 +100,12 @@ router.post(
   dmController.removeFromDmHandler
 );
 router.get("/getDmFriends", validateToken, dmController.getDmFriends);
-
-//////////////////////////////////////////////////////// DM ROUTES /////////////////////////////////////////////////////////////////////////
-
 router.get(
   "/getDmMessages/:id?",
   validateToken,
   OneToOneChatController.getDmMessages
 );
+
+//////////////////////////////////////////////////////// DM ROUTES /////////////////////////////////////////////////////////////////////////
 
 module.exports = router;
