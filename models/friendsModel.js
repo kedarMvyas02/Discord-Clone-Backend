@@ -16,6 +16,9 @@ const friendSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    roomCode: {
+      type: String,
+    },
   },
   {
     toJSON: { virtuals: true },

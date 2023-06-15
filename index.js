@@ -4,11 +4,9 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const User = require("./models/userModel");
 const OneToOneMessage = require("./models/OneToOneMessageModel");
-const AppError = require("./ErrorHandlers/AppError");
 const Dm = require("./models/DmModel");
 const GroupMessage = require("./models/GroupMessageModel");
 const Member = require("./models/memeberModel");
-const { default: mongoose } = require("mongoose");
 //////////////////////////////////////////////////////////////////////////////////
 
 const io = new Server(server, {
@@ -120,6 +118,20 @@ io.on("connection", async (socket) => {
         io.to(item).emit("message", {
           populatedChat,
         });
+      });
+    }
+  });
+
+  //============= ONE TO ONE CALL ==============
+  socket.on("private-call", async (data) => {
+    const { from, to } = data;
+
+    const toSocketId = allUsers.get(to);
+    console.log(toSocketId);
+
+    if (toSocketId) {
+      io.to(toSocketId).emit("incoming-call", {
+        from,
       });
     }
   });

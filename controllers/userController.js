@@ -10,6 +10,7 @@ const Server = require("../models/serverModel");
 const Member = require("../models/memeberModel");
 const Friend = require("../models/friendsModel");
 const Dm = require("../models/DmModel");
+const axios = require("axios");
 
 // generates a random token for forgot password functionality
 const generateToken = () => {
@@ -392,10 +393,48 @@ const acceptFriendRequest = asyncHandler(async (req, res, next) => {
   if (!requestExists)
     return next(new AppError("Friend Request does not exists", 400));
 
+  // generate a room
+  const managementToken = process.env.MANAGEMENT_TOKEN;
+  const template_id = process.env.TEMPLATE_ID;
+  const roomUrl = "https://api.100ms.live/v2/rooms";
+
+  const requestData = {
+    name: `${req.user.name}_${requestExists.name}`,
+    description: "This is a sample description for the room",
+    template_id: template_id,
+    region: "in",
+  };
+
+  const response = await axios.post(roomUrl, requestData, {
+    headers: {
+      Authorization: `Bearer ${managementToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const createdRoom = response.data;
+  console.log("Room created id:", createdRoom?.id);
+
+  // create room code
+
+  const roomId = createdRoom?.id;
+  const roomCodeUrl = `https://api.100ms.live/v2/room-codes/room/${roomId}`;
+
+  const resp = await axios.post(roomCodeUrl, null, {
+    headers: {
+      Authorization: `Bearer ${managementToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const roomCode = resp.data.data[0].code;
+  console.log("Room code created:", roomCode);
+
   await Friend.findByIdAndUpdate(
     { _id: requestExists._id },
     {
       accepted: true,
+      roomCode: roomCode,
     },
     { new: true }
   );
@@ -404,6 +443,7 @@ const acceptFriendRequest = asyncHandler(async (req, res, next) => {
     user: req.user.id,
     friend: friend._id,
     accepted: true,
+    roomCode: roomCode,
   });
 
   if (!done)
@@ -422,12 +462,15 @@ const getFriends = asyncHandler(async (req, res, next) => {
   if (friends.length == 0)
     return next(new AppError("you don't have any friends", 404));
 
-  const friendsNames = friends.map((friend) => ({
-    _id: friend.friend._id,
-    friend: friend.friend.name,
-    uniqueCode: friend.friend.uniqueCode,
-    userImage: friend.friend.userImage,
-  }));
+  const friendsNames = friends.map((friend) => {
+    return {
+      _id: friend.friend._id,
+      friend: friend.friend.name,
+      uniqueCode: friend.friend.uniqueCode,
+      userImage: friend.friend.userImage,
+      roomCode: friend.roomCode,
+    };
+  });
 
   return res.status(200).json({
     allFriends: friendsNames,
