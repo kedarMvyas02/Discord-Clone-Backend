@@ -3,6 +3,7 @@ const AppError = require("../ErrorHandlers/AppError");
 const Server = require("../models/serverModel");
 const VoiceChannel = require("../models/voiceChannelModel");
 const { default: mongoose } = require("mongoose");
+const axios = require("axios");
 
 ////////////////////////////////////////////////////// CREATE VOICE CHANNEL ////////////////////////////////////////////////////////////////////////////////
 
@@ -30,9 +31,47 @@ const createVoiceChannel = asyncHandler(async (req, res, next) => {
   if (channelExists.length > 0)
     return next(new AppError("Channel Name is taken", 400));
 
+  // generate a room
+  const template_id = process.env.TEMPLATE_ID;
+  const managementToken = process.env.MANAGEMENT_TOKEN;
+  const roomUrl = "https://api.100ms.live/v2/rooms";
+
+  const requestData = {
+    name: `${Date.now()}`,
+    description: "This is a sample description for the room",
+    template_id: template_id,
+    region: "in",
+  };
+
+  const response = await axios.post(roomUrl, requestData, {
+    headers: {
+      Authorization: `Bearer ${managementToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const createdRoom = response.data;
+  console.log("Room created id:", createdRoom?.id);
+
+  // create room code
+
+  const roomId = createdRoom?.id;
+  const roomCodeUrl = `https://api.100ms.live/v2/room-codes/room/${roomId}`;
+
+  const resp = await axios.post(roomCodeUrl, null, {
+    headers: {
+      Authorization: `Bearer ${managementToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const roomCode = resp.data.data[0].code;
+  console.log("Room code created:", roomCode);
+
   const created = await VoiceChannel.create({
     name,
     server: id,
+    roomCode,
   });
 
   if (!created) return next(new AppError("Voice channel didn't created", 500));

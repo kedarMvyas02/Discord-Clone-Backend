@@ -6,6 +6,7 @@ const Member = require("../models/memeberModel");
 const TextChannel = require("../models/textChannelModel");
 const VoiceChannel = require("../models/voiceChannelModel");
 const cloudinary = require("cloudinary").v2;
+const axios = require("axios");
 require("dotenv").config();
 
 ////////////////////////////////////////////////////// CREATE SERVER ////////////////////////////////////////////////////////////////////////////////
@@ -43,9 +44,47 @@ const createServer = asyncHandler(async (req, res, next) => {
     server: newServer._id,
   });
 
+  // generate a room
+  const template_id = process.env.TEMPLATE_ID;
+  const managementToken = process.env.MANAGEMENT_TOKEN;
+  const roomUrl = "https://api.100ms.live/v2/rooms";
+
+  const requestData = {
+    name: `${Date.now()}`,
+    description: "This is a sample description for the room",
+    template_id: template_id,
+    region: "in",
+  };
+
+  const response = await axios.post(roomUrl, requestData, {
+    headers: {
+      Authorization: `Bearer ${managementToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const createdRoom = response.data;
+  console.log("Room created id:", createdRoom?.id);
+
+  // create room code
+
+  const roomId = createdRoom?.id;
+  const roomCodeUrl = `https://api.100ms.live/v2/room-codes/room/${roomId}`;
+
+  const resp = await axios.post(roomCodeUrl, null, {
+    headers: {
+      Authorization: `Bearer ${managementToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const roomCode = resp.data.data[0].code;
+  console.log("Room code created:", roomCode);
+
   await VoiceChannel.create({
     name: "general",
     server: newServer._id,
+    roomCode,
   });
 
   res.status(201).json({
@@ -131,7 +170,7 @@ const getServer = asyncHandler(async (req, res, next) => {
     })
     .populate({
       path: "voiceChannels",
-      select: "name _id -server",
+      select: "name _id roomCode -server",
     })
     .lean();
 

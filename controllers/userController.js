@@ -11,6 +11,7 @@ const Member = require("../models/memeberModel");
 const Friend = require("../models/friendsModel");
 const Dm = require("../models/DmModel");
 const axios = require("axios");
+const uuid4 = require("uuid4");
 
 // generates a random token for forgot password functionality
 const generateToken = () => {
@@ -393,9 +394,42 @@ const acceptFriendRequest = asyncHandler(async (req, res, next) => {
   if (!requestExists)
     return next(new AppError("Friend Request does not exists", 400));
 
+  // generate managemenet token
+  // let managementToken = "";
+
+  // const app_access_key = process.env.APP_ACCESS_KEY;
+  // const app_secret = process.env.APP_SECRET;
+  // console.log(app_access_key, app_secret);
+  // const payload = {
+  //   access_key: app_access_key,
+  //   type: "management",
+  //   version: 2,
+  //   iat: Math.floor(Date.now() / 1000),
+  //   nbf: Math.floor(Date.now() / 1000),
+  // };
+
+  // await jwt.sign(
+  //   payload,
+  //   app_secret,
+  //   {
+  //     algorithm: "HS256",
+  //     expiresIn: "24h",
+  //     jwtid: uuid4(),
+  //   },
+  //   function (err, token) {
+  //     if (err) {
+  //       console.log(err);
+  //     }
+  //     managementToken = token;
+  //   }
+  // );
+
+  // console.log("managementToken", managementToken);
+  // console.log("mToken", mToken);
+
   // generate a room
-  const managementToken = process.env.MANAGEMENT_TOKEN;
   const template_id = process.env.TEMPLATE_ID;
+  const managementToken = process.env.MANAGEMENT_TOKEN;
   const roomUrl = "https://api.100ms.live/v2/rooms";
 
   const requestData = {
