@@ -136,6 +136,28 @@ io.on("connection", async (socket) => {
     }
   });
 
+  //============= USER JOINED VC ==============
+  socket.on("user-joined", async (data) => {
+    const { user, server, channel } = data;
+
+    const serverMembers = await Member.find({ server });
+
+    let temp = [];
+    serverMembers.map((item) => {
+      const userId = item.user.toString();
+      const userToken = allUsers.get(userId);
+      temp.push(userToken);
+    });
+
+    if (temp) {
+      temp?.forEach((item) => {
+        io.to(item).emit("joining-update", {
+          populatedChat,
+        });
+      });
+    }
+  });
+
   socket.on("end", async (data) => {
     // Find user by ID and set status as offline
     if (data.user_id) {

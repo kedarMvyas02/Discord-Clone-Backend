@@ -50,7 +50,7 @@ const createServer = asyncHandler(async (req, res, next) => {
   const roomUrl = "https://api.100ms.live/v2/rooms";
 
   const requestData = {
-    name: `${Date.now()}`,
+    name: `${req.user.name}_${Date.now()}`,
     description: "This is a sample description for the room",
     template_id: template_id,
     region: "in",

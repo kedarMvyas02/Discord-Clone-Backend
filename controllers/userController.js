@@ -433,7 +433,7 @@ const acceptFriendRequest = asyncHandler(async (req, res, next) => {
   const roomUrl = "https://api.100ms.live/v2/rooms";
 
   const requestData = {
-    name: `${req.user.name}_${requestExists.name}`,
+    name: `${req.user.name}_${Date.now()}`,
     description: "This is a sample description for the room",
     template_id: template_id,
     region: "in",
