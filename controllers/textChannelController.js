@@ -18,14 +18,6 @@ const createTextChannel = asyncHandler(async (req, res, next) => {
   const serverExists = await Server.findById(id);
   if (!serverExists) return next(new AppError("Server not found", 404));
 
-  if (serverExists.owner.toString() !== req.user.id)
-    return next(
-      new AppError(
-        "You are not Admin of this server, so can't create channel in this server",
-        401
-      )
-    );
-
   const channelExists = await TextChannel.find({ name, server: id });
   if (channelExists.length > 0)
     return next(new AppError("Channel Name is taken", 400));

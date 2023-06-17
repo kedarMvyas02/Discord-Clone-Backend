@@ -7,6 +7,7 @@ const TextChannel = require("../models/textChannelModel");
 const VoiceChannel = require("../models/voiceChannelModel");
 const cloudinary = require("cloudinary").v2;
 const axios = require("axios");
+const User = require("../models/userModel");
 require("dotenv").config();
 
 ////////////////////////////////////////////////////// CREATE SERVER ////////////////////////////////////////////////////////////////////////////////
@@ -216,7 +217,7 @@ const getServer = asyncHandler(async (req, res, next) => {
   // }
 });
 
-////////////////////////////////////////////////////// GET SERVER DYNAMICALLY ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////// GET JOINED SERVER ////////////////////////////////////////////////////////////////////////////////
 
 const getJoinedServers = asyncHandler(async (req, res, next) => {
   const joinedServers = await Member.find({ user: req.user.id })
@@ -259,14 +260,26 @@ const getJoinedServers = asyncHandler(async (req, res, next) => {
   });
 });
 
+////////////////////////////////////////////////////// JOIN SERVER ////////////////////////////////////////////////////////////////////////////////
+
 const joinServer = asyncHandler(async (req, res, next) => {
   const serverId = req.params.id;
-  const user = req.user.id;
+  const code = req.body.uniqueCode;
+
+  const user = await User.findOne({ uniqueCode: code });
+  if (!user)
+    return next(
+      new AppError(
+        "User does not exists, please check the unique code and try again",
+        404
+      )
+    );
+
   const servers = await Server.findById(serverId);
   if (!servers) return next(new AppError("server not found", 404));
 
   const joinedServers = await Member.findOne({
-    user: req.user.id,
+    user: user._id,
     server: serverId,
   });
   if (joinedServers)
@@ -274,7 +287,7 @@ const joinServer = asyncHandler(async (req, res, next) => {
 
   const joined = await Member.create({
     server: serverId,
-    user,
+    user: user._id,
   });
 
   if (!joined)
@@ -288,6 +301,8 @@ const joinServer = asyncHandler(async (req, res, next) => {
     msg: "You have successfully joined the server",
   });
 });
+
+////////////////////////////////////////////////////// LEAVE SERVER ////////////////////////////////////////////////////////////////////////////////
 
 const leaveServer = asyncHandler(async (req, res, next) => {
   const serverId = req.params.id;

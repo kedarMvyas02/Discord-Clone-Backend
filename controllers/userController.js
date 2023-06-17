@@ -11,7 +11,6 @@ const Member = require("../models/memeberModel");
 const Friend = require("../models/friendsModel");
 const Dm = require("../models/DmModel");
 const axios = require("axios");
-const uuid4 = require("uuid4");
 
 // generates a random token for forgot password functionality
 const generateToken = () => {
