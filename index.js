@@ -126,18 +126,20 @@ io.on("connection", async (socket) => {
   socket.on("private-call", async (data) => {
     const { from, to } = data;
 
+    const from_user = await User.findById(from); // req.user
+
     const toSocketId = allUsers.get(to);
     console.log(toSocketId);
 
     if (toSocketId) {
       io.to(toSocketId).emit("incoming-call", {
-        from,
+        from_user,
       });
     }
   });
 
   //============= USER JOINED VC ==============
-  socket.on("user-joined", async (data) => {
+  socket.on("user-joined-vc", async (data) => {
     const { user, server, channel } = data;
 
     const serverMembers = await Member.find({ server });
@@ -151,8 +153,10 @@ io.on("connection", async (socket) => {
 
     if (temp) {
       temp?.forEach((item) => {
-        io.to(item).emit("joining-update", {
-          populatedChat,
+        io.to(item).emit("joining-vc-update", {
+          user,
+          server,
+          channel,
         });
       });
     }
