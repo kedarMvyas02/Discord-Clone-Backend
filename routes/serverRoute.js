@@ -7,6 +7,7 @@ const uploadPhoto = require("../middlewares/uploadPhoto");
 const dmController = require("../controllers/DmController");
 const OneToOneChatController = require("../controllers/OneToOneChatController");
 const GroupMessageController = require("../controllers/groupMessageController");
+const messagesFinder = require("../controllers/searchFunctionalities");
 const router = express.Router();
 
 //////////////////////////////////////////////////////// SERVER ROUTES ///////////////////////////////////////////////////////////////////////////////
@@ -107,5 +108,7 @@ router.get(
 );
 
 //////////////////////////////////////////////////////// DM ROUTES /////////////////////////////////////////////////////////////////////////
+
+router.get("/messageFinder/:messages", messagesFinder);
 
 module.exports = router;

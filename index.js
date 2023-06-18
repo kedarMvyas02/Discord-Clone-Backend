@@ -162,6 +162,8 @@ io.on("connection", async (socket) => {
     }
   });
 
+  socket.on("leave-voice-channel", async (data) => {});
+
   socket.on("end", async (data) => {
     // Find user by ID and set status as offline
     if (data.user_id) {
