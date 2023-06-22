@@ -1,11 +1,15 @@
 const asyncHandler = require("express-async-handler");
 const AppError = require("../ErrorHandlers/AppError");
 const OneToOneMessage = require("../models/OneToOneMessageModel");
+const { default: mongoose } = require("mongoose");
 
 const getDmMessages = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
+  const content = req.query.content;
+  const regex = new RegExp(content, "i");
 
   const messages = await OneToOneMessage.find({
+    content: { $regex: regex },
     $or: [
       { sender: req.user.id, reciever: id },
       { sender: id, reciever: req.user.id },
@@ -48,9 +52,11 @@ const getPinnedMessages = asyncHandler(async (req, res, next) => {
       path: "reciever",
       select: "name _id uniqueCode email userImage status createdAt",
     })
+    .populate({
+      path: "user",
+      select: "name _id uniqueCode email userImage status createdAt",
+    })
     .sort({ createdAt: 1 });
-
-  console.log(messages);
 
   if (!messages) {
     return next(new AppError("There are no messages", 500));
@@ -62,18 +68,23 @@ const getPinnedMessages = asyncHandler(async (req, res, next) => {
 });
 
 const pinMessage = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
-  console.log("i am here");
+  const id = new mongoose.Types.ObjectId(req.params.id);
 
   const messages = await OneToOneMessage.findByIdAndUpdate(id, {
     pinned: true,
-  }).sort({ createdAt: 1 });
-  console.log(messages);
+  }).populate("user");
 
-  if (messages.length < 1) {
-    return next(new AppError("There are no messages", 500));
-  }
-  console.log("i am here");
+  return res.status(200).json({
+    messages,
+  });
+});
+
+const deletePinnedMessage = asyncHandler(async (req, res, next) => {
+  const id = new mongoose.Types.ObjectId(req.params.id);
+
+  const messages = await OneToOneMessage.findByIdAndUpdate(id, {
+    pinned: false,
+  }).populate("user");
 
   return res.status(200).json({
     messages,
@@ -102,4 +113,5 @@ module.exports = {
   getPinnedMessages,
   deleteMessage,
   pinMessage,
+  deletePinnedMessage,
 };

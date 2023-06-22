@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const oneToOneMessage = new mongoose.Schema(
+const oneToOneMessageSchema = new mongoose.Schema(
   {
     sender: {
       type: mongoose.Schema.Types.ObjectId,
@@ -19,9 +19,20 @@ const oneToOneMessage = new mongoose.Schema(
     },
   },
   {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
     timestamps: true,
   }
 );
 
-const OneToOneMessage = new mongoose.model("OneToOneMessage", oneToOneMessage);
+oneToOneMessageSchema.virtual("user", {
+  ref: "User",
+  localField: "sender",
+  foreignField: "_id",
+});
+
+const OneToOneMessage = new mongoose.model(
+  "OneToOneMessage",
+  oneToOneMessageSchema
+);
 module.exports = OneToOneMessage;

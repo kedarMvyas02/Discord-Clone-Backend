@@ -112,6 +112,11 @@ router.get(
   validateToken,
   GroupMessageController.getPinnedMessages
 );
+router.post(
+  "/deletePinnedMessage/:id?",
+  validateToken,
+  GroupMessageController.deletePinnedMessage
+);
 
 //////////////////////////////////////////////////////// DM ROUTES /////////////////////////////////////////////////////////////////////////
 
@@ -141,6 +146,11 @@ router.get(
   "/getDmPinnedMessages/:id?",
   validateToken,
   OneToOneChatController.getPinnedMessages
+);
+router.post(
+  "/deleteDmPinnedMessage/:id?",
+  validateToken,
+  OneToOneChatController.deletePinnedMessage
 );
 
 //////////////////////////////////////////////////////// DM ROUTES /////////////////////////////////////////////////////////////////////////

@@ -4,8 +4,13 @@ const GroupMessage = require("../models/GroupMessageModel");
 
 const getChannelMessages = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
+  const content = req.query.content;
+  const regex = new RegExp(content, "i");
 
-  const messages = await GroupMessage.find({ channel: id })
+  const messages = await GroupMessage.find({
+    channel: id,
+    content: { $regex: regex },
+  })
     .populate({
       path: "sender",
       select: "name _id uniqueCode email userImage status createdAt",
@@ -53,9 +58,9 @@ const getPinnedMessages = asyncHandler(async (req, res, next) => {
     .sort({ createdAt: 1 })
     .lean();
 
-  if (messages.length < 1) {
-    return next(new AppError("There are no messages", 500));
-  }
+  // if (messages.length < 1) {
+  //   return next(new AppError("There are no messages", 500));
+  // }
 
   return res.status(200).json({
     messages,
@@ -67,11 +72,28 @@ const pinMessage = asyncHandler(async (req, res, next) => {
 
   const messages = await GroupMessage.findByIdAndUpdate(id, {
     pinned: true,
-  }).sort({ createdAt: 1 });
+  });
 
   if (messages.length < 1) {
     return next(new AppError("There are no messages", 500));
   }
+
+  return res.status(200).json({
+    messages,
+  });
+});
+
+const deletePinnedMessage = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+  const msgExists = await GroupMessage.findOne({ _id: id });
+
+  const messages = await GroupMessage.findByIdAndUpdate(
+    msgExists._id,
+    {
+      pinned: false,
+    },
+    { new: true }
+  );
 
   return res.status(200).json({
     messages,
@@ -83,4 +105,5 @@ module.exports = {
   deleteMessage,
   getPinnedMessages,
   pinMessage,
+  deletePinnedMessage,
 };

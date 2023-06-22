@@ -488,7 +488,17 @@ const acceptFriendRequest = asyncHandler(async (req, res, next) => {
 });
 
 const getFriends = asyncHandler(async (req, res, next) => {
-  const friends = await Friend.find({ user: req.user.id, accepted: true })
+  // const name = req.query.name;
+  // const regex = new RegExp(name, "i");
+
+  const friends = await Friend.find({
+    user: req.user.id,
+    accepted: true,
+    // $or: [
+    //   { "user.name": { $regex: regex } },
+    //   { "friend.name": { $regex: regex } },
+    // ],
+  })
     .populate("user")
     .populate("friend");
 
