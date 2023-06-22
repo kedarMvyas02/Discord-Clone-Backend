@@ -24,7 +24,10 @@ io.on("connection", async (socket) => {
 
   socket.on("add-user", ({ user_id }) => {
     allUsers.set(user_id, socket.id);
-    console.log(allUsers);
+    const filteredMap = new Map(
+      [...allUsers].filter(([key]) => key !== undefined)
+    );
+    console.log(filteredMap);
   });
 
   // Handle incoming text messages
@@ -162,7 +165,11 @@ io.on("connection", async (socket) => {
     }
   });
 
-  socket.on("leave-voice-channel", async (data) => {});
+  //============= USER LEAVING VC ==============
+
+  socket.on("leaving-vc", async (data) => {
+    io.emit("leaving-vc-update", data);
+  });
 
   socket.on("end", async (data) => {
     // Find user by ID and set status as offline

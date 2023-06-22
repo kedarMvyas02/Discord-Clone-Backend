@@ -13,6 +13,10 @@ const oneToOneMessage = new mongoose.Schema(
     content: {
       type: String,
     },
+    pinned: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

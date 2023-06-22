@@ -13,11 +13,22 @@ const groupMessageSchema = new mongoose.Schema(
     content: {
       type: String,
     },
+    pinned: {
+      type: Boolean,
+    },
   },
   {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
     timestamps: true,
   }
 );
+
+groupMessageSchema.virtual("user", {
+  ref: "User",
+  localField: "sender",
+  foreignField: "_id",
+});
 
 const GroupMessage = new mongoose.model("GroupMessage", groupMessageSchema);
 module.exports = GroupMessage;

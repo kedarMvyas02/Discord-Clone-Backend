@@ -7,7 +7,7 @@ const uploadPhoto = require("../middlewares/uploadPhoto");
 const dmController = require("../controllers/DmController");
 const OneToOneChatController = require("../controllers/OneToOneChatController");
 const GroupMessageController = require("../controllers/groupMessageController");
-const messagesFinder = require("../controllers/searchFunctionalities");
+const searchFunctionalities = require("../controllers/searchFunctionalities");
 const router = express.Router();
 
 //////////////////////////////////////////////////////// SERVER ROUTES ///////////////////////////////////////////////////////////////////////////////
@@ -34,6 +34,12 @@ router.post("/join/:id", validateToken, serverController.joinServer);
 router.post("/leave/:id", validateToken, serverController.leaveServer);
 
 router.get("/joinedServers", validateToken, serverController.getJoinedServers);
+router.get("/allMembers/:id?", validateToken, serverController.getMembers);
+router.get(
+  "/getPublicServers",
+  validateToken,
+  serverController.getPublicServers
+);
 
 //////////////////////////////////////////////////////// TEXT CHANNEL ROUTES /////////////////////////////////////////////////////////////////////////
 
@@ -91,6 +97,21 @@ router.get(
   validateToken,
   GroupMessageController.getChannelMessages
 );
+router.post(
+  "/deleteMessage/:id?",
+  validateToken,
+  GroupMessageController.deleteMessage
+);
+router.post(
+  "/pinMessage/:id?",
+  validateToken,
+  GroupMessageController.pinMessage
+);
+router.get(
+  "/getPinnedMessages/:id?",
+  validateToken,
+  GroupMessageController.getPinnedMessages
+);
 
 //////////////////////////////////////////////////////// DM ROUTES /////////////////////////////////////////////////////////////////////////
 
@@ -106,9 +127,25 @@ router.get(
   validateToken,
   OneToOneChatController.getDmMessages
 );
+router.post(
+  "/deleteDmMessage/:id?",
+  validateToken,
+  OneToOneChatController.deleteMessage
+);
+router.post(
+  "/pinDmMessage/:id?",
+  validateToken,
+  OneToOneChatController.pinMessage
+);
+router.get(
+  "/getDmPinnedMessages/:id?",
+  validateToken,
+  OneToOneChatController.getPinnedMessages
+);
 
 //////////////////////////////////////////////////////// DM ROUTES /////////////////////////////////////////////////////////////////////////
 
-router.get("/messageFinder/:messages", messagesFinder);
+router.get("/messageFinder/:messages", searchFunctionalities.messagesFinder);
+router.get("/searchServers", searchFunctionalities.searchServers);
 
 module.exports = router;

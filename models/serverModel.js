@@ -15,6 +15,14 @@ const serverSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please add an Image"],
     },
+    description: {
+      type: String,
+    },
+    privacy: {
+      type: String,
+      enum: ["public", "private"],
+      default: "private",
+    },
   },
   {
     toJSON: { virtuals: true },

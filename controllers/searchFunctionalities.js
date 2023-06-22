@@ -1,4 +1,5 @@
 const OneToOneMessage = require("../models/OneToOneMessageModel");
+const Server = require("../models/serverModel");
 const AppError = require("../ErrorHandlers/AppError");
 const asyncHandler = require("express-async-handler");
 
@@ -22,4 +23,18 @@ const messagesFinder = asyncHandler(async (req, res, next) => {
   console.log(foundMessages);
 });
 
-module.exports = messagesFinder;
+const searchServers = asyncHandler(async (req, res, next) => {
+  const name = req.query.name;
+  const regex = new RegExp(name, "i");
+
+  const servers = await Server.find({
+    name: { $regex: regex },
+    privacy: "public",
+  }).populate("members");
+
+  return res.status(200).json({
+    servers,
+  });
+});
+
+module.exports = { messagesFinder, searchServers };

@@ -8,6 +8,7 @@ const VoiceChannel = require("../models/voiceChannelModel");
 const cloudinary = require("cloudinary").v2;
 const axios = require("axios");
 const User = require("../models/userModel");
+const GroupMessage = require("../models/GroupMessageModel");
 require("dotenv").config();
 
 ////////////////////////////////////////////////////// CREATE SERVER ////////////////////////////////////////////////////////////////////////////////
@@ -144,9 +145,19 @@ const deleteServer = asyncHandler(async (req, res, next) => {
   }
 
   const deleted = await currServer.deleteOne({ id });
+  const allTextChannels = await TextChannel.find({ server: id });
+  console.log(allTextChannels);
 
   if (deleted) {
     // TODO delete channels, messages, members...
+    await TextChannel.deleteMany({ server: id });
+    await VoiceChannel.deleteMany({ server: id });
+    await Member.deleteMany({ server: id });
+    allTextChannels.forEach(async (id) => {
+      console.log(id);
+      console.log(id._id);
+      await GroupMessage.deleteMany({ channel: id._id });
+    });
 
     return res.status(200).json({
       message: "Server has been deleted successfully",
@@ -173,6 +184,14 @@ const getServer = asyncHandler(async (req, res, next) => {
       path: "voiceChannels",
       select: "name _id roomCode -server",
     })
+    .populate({
+      path: "members",
+      select: "user _id server",
+      populate: {
+        path: "user",
+        select: "name uniqueCode _id userImage",
+      },
+    })
     .lean();
 
   if (!currServer) return next(new AppError("Server not found", 404));
@@ -181,40 +200,6 @@ const getServer = asyncHandler(async (req, res, next) => {
     message: "Server found successfully",
     server: currServer,
   });
-  // } else {
-  //   currServer = await Server.find()
-  //     .populate({
-  //       path: "textChannels",
-  //       select: "name -_id -server",
-  //     })
-  //     .populate({
-  //       path: "voiceChannels",
-  //       select: "name -_id -server",
-  //     })
-  //     .lean();
-  //   if (!currServer) return next(new AppError("No Server found", 404));
-
-  //   const allServers = currServer.map((server) => {
-  //     const {
-  //       createdAt,
-  //       updatedAt,
-  //       __v,
-  //       textChannels,
-  //       voiceChannels,
-  //       ...rest
-  //     } = server;
-  //     return {
-  //       ...rest,
-  //       textChannels: textChannels.map(({ name }) => name),
-  //       voiceChannels: voiceChannels.map(({ name }) => name),
-  //     };
-  //   });
-
-  //   return res.status(200).json({
-  //     message: "Server found successfully",
-  //     server: allServers,
-  //   });
-  // }
 });
 
 ////////////////////////////////////////////////////// GET JOINED SERVER ////////////////////////////////////////////////////////////////////////////////
@@ -243,6 +228,7 @@ const getJoinedServers = asyncHandler(async (req, res, next) => {
   const kedar = await Server.find({ _id: { $in: temp } })
     .populate("textChannels")
     .populate("voiceChannels")
+    .populate("members")
     .exec();
 
   const responseWithChannels = {
@@ -252,6 +238,7 @@ const getJoinedServers = asyncHandler(async (req, res, next) => {
       avatar: server.avatar,
       textChannels: server.textChannels,
       voiceChannels: server.voiceChannels,
+      members: server.members,
     })),
   };
 
@@ -282,8 +269,10 @@ const joinServer = asyncHandler(async (req, res, next) => {
     user: user._id,
     server: serverId,
   });
+
+  console.log(joinedServers);
   if (joinedServers)
-    return next(new AppError("You have already joined this server", 400));
+    return next(new AppError("User has already joined this server", 400));
 
   const joined = await Member.create({
     server: serverId,
@@ -293,12 +282,12 @@ const joinServer = asyncHandler(async (req, res, next) => {
   if (!joined)
     return next(
       new AppError(
-        "Something went wrong and you were not joined in this server"
+        "Something went wrong and User was not able to join in this server"
       )
     );
 
   return res.status(200).json({
-    msg: "You have successfully joined the server",
+    msg: "User have successfully joined the server",
   });
 });
 
@@ -307,6 +296,7 @@ const joinServer = asyncHandler(async (req, res, next) => {
 const leaveServer = asyncHandler(async (req, res, next) => {
   const serverId = req.params.id;
   const user = req.user.id;
+
   const servers = await Server.findById(serverId);
   if (!servers) return next(new AppError("server not found", 404));
 
@@ -332,6 +322,38 @@ const leaveServer = asyncHandler(async (req, res, next) => {
   });
 });
 
+////////////////////////////////////////////////////// LEAVE SERVER ////////////////////////////////////////////////////////////////////////////////
+
+const getMembers = asyncHandler(async (req, res, next) => {
+  const serverId = req.params.id;
+
+  const servers = await Server.findById(serverId);
+  if (!servers) return next(new AppError("server not found", 404));
+
+  const allMembers = await Member.find({
+    server: serverId,
+  });
+
+  if (!allMembers) return next(new AppError("There are no members yet!", 403));
+
+  return res.status(200).json({
+    allMembers,
+  });
+});
+
+////////////////////////////////////////////////////// PUBLIC SERVERS ////////////////////////////////////////////////////////////////////////////////
+
+const getPublicServers = asyncHandler(async (req, res, next) => {
+  const publicServers = await Server.find({ privacy: "public" }).populate(
+    "members"
+  );
+  if (!publicServers) return next(new AppError("No public Servers", 404));
+
+  res.status(200).json({
+    publicServers,
+  });
+});
+
 module.exports = {
   createServer,
   updateServer,
@@ -340,4 +362,6 @@ module.exports = {
   getJoinedServers,
   joinServer,
   leaveServer,
+  getMembers,
+  getPublicServers,
 };

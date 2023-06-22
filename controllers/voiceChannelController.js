@@ -42,7 +42,7 @@ const createVoiceChannel = asyncHandler(async (req, res, next) => {
     },
   });
 
-  const createdRoom = response.data;
+  const createdRoom = response?.data;
   console.log("Room created id:", createdRoom?.id);
 
   // create room code
