@@ -25,10 +25,13 @@ const messagesFinder = asyncHandler(async (req, res, next) => {
 
 const searchServers = asyncHandler(async (req, res, next) => {
   const name = req.query.name;
-  const regex = new RegExp(name, "i");
+  const serverType = req.query.serverType;
+  const nameRegex = new RegExp(name, "i");
+  const serverTypeRegex = new RegExp(serverType, "i");
 
   const servers = await Server.find({
-    name: { $regex: regex },
+    name: { $regex: nameRegex },
+    serverType: { $regex: serverTypeRegex },
     privacy: "public",
   }).populate("members");
 

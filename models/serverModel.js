@@ -23,6 +23,20 @@ const serverSchema = new mongoose.Schema(
       enum: ["public", "private"],
       default: "private",
     },
+    serverType: {
+      type: String,
+      enum: [
+        "gaming",
+        "music",
+        "education",
+        "scienceAndTech",
+        "contentCreator",
+        "animeAndManga",
+        "moviesAndTv",
+        "other",
+      ],
+      default: "other",
+    },
   },
   {
     toJSON: { virtuals: true },
