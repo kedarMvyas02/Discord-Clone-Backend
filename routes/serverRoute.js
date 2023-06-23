@@ -23,11 +23,7 @@ router.patch(
   validateToken,
   serverController.updateServer
 );
-router.delete(
-  "/deleteServer/:id?",
-  validateToken,
-  serverController.deleteServer
-);
+router.post("/deleteServer/:id?", validateToken, serverController.deleteServer);
 router.get("/getServer/:id?", validateToken, serverController.getServer);
 
 router.post("/join/:id", validateToken, serverController.joinServer);

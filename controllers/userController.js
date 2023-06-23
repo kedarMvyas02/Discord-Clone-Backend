@@ -27,9 +27,9 @@ const hashToken = (token) => {
 const generateUniqueCode = async () => {
   // Generates a random 4-digit number between 1000 and 9999
   const code = Math.floor(1000 + Math.random() * 9000);
-  const codeInUse = await User.find({ uniqueCode: code });
+  const codeInUse = await User.findOne({ uniqueCode: code });
 
-  if (codeInUse.length > 0) {
+  if (!codeInUse) {
     return generateUniqueCode();
   } else {
     return code;
@@ -203,6 +203,17 @@ const loginUser = asyncHandler(async (req, res, next) => {
   }
 });
 
+// update user only if same user is logged in
+const updateUser = asyncHandler(async (req, res, next) => {
+  const user = await User.findByIdAndUpdate(req.user.id, req.body, {
+    new: true,
+  });
+
+  return res.status(200).json({
+    user,
+  });
+});
+
 // deletes user only if same user is logged in
 const deleteUser = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
@@ -245,10 +256,10 @@ const deleteUser = asyncHandler(async (req, res, next) => {
 // sends a email with a token for authentication to change password
 const forgotPassword = asyncHandler(async (req, res, next) => {
   const email = req.body.email;
-  if (!email) return next(new AppError("Email field is compulsary", 403));
+  if (!email) return next(new AppError("Email field is compulsary", 400));
 
   const user = await User.findOne({ email });
-  if (!user) return next(new AppError("Email is not registered yet", 403));
+  if (!user) return next(new AppError("Email is not registered yet", 400));
 
   const resetToken = generateToken();
   const tokenDB = hashToken(resetToken);
@@ -294,7 +305,7 @@ const resetPassword = asyncHandler(async (req, res, next) => {
   const token = req.params.token;
   if (token == "null") {
     return next(
-      new AppError("Token not present, click forgot password again", 403)
+      new AppError("Token not present, click forgot password again", 400)
     );
   }
 
@@ -503,7 +514,12 @@ const getFriends = asyncHandler(async (req, res, next) => {
     .populate("friend");
 
   if (friends.length == 0)
-    return next(new AppError("you don't have any friends", 404));
+    return next(
+      new AppError(
+        "You don't have any Friends, don't worry wumpus is your bff :)",
+        404
+      )
+    );
 
   const friendsNames = friends.map((friend) => {
     return {
@@ -527,7 +543,12 @@ const getPendingRequests = asyncHandler(async (req, res, next) => {
     .populate("user")
     .populate("friend");
   if (friends.length == 0)
-    return next(new AppError("you don't have any pending requests", 404));
+    return next(
+      new AppError(
+        "You don't have any Pending Friend Requests, dw i'm your friend",
+        404
+      )
+    );
 
   const friendsNames = friends.map((friend) => ({
     _id: friend.friend._id,
@@ -549,7 +570,7 @@ const getArrivedFriendRequests = asyncHandler(async (req, res, next) => {
     .populate("friend");
   if (friends.length == 0)
     return next(
-      new AppError("you don't have any arrived friend requests", 404)
+      new AppError("You don't have any Arrived Friend Requests", 404)
     );
 
   const friendsNames = friends.map((friend) => ({
@@ -652,6 +673,7 @@ const removeFriend = asyncHandler(async (req, res, next) => {
 module.exports = {
   registerUser,
   loginUser,
+  updateUser,
   deleteUser,
   forgotPassword,
   resetPassword,

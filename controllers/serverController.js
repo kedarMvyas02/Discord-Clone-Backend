@@ -146,7 +146,6 @@ const deleteServer = asyncHandler(async (req, res, next) => {
 
   const deleted = await currServer.deleteOne({ id });
   const allTextChannels = await TextChannel.find({ server: id });
-  console.log(allTextChannels);
 
   if (deleted) {
     // TODO delete channels, messages, members...
@@ -154,8 +153,6 @@ const deleteServer = asyncHandler(async (req, res, next) => {
     await VoiceChannel.deleteMany({ server: id });
     await Member.deleteMany({ server: id });
     allTextChannels.forEach(async (id) => {
-      console.log(id);
-      console.log(id._id);
       await GroupMessage.deleteMany({ channel: id._id });
     });
 
@@ -270,7 +267,6 @@ const joinServer = asyncHandler(async (req, res, next) => {
     server: serverId,
   });
 
-  console.log(joinedServers);
   if (joinedServers)
     return next(new AppError("User has already joined this server", 400));
 
@@ -304,6 +300,7 @@ const leaveServer = asyncHandler(async (req, res, next) => {
     user: req.user.id,
     server: serverId,
   });
+  
   if (!joinedServers)
     return next(new AppError("You haven't joined this server yet", 403));
 

@@ -171,6 +171,40 @@ io.on("connection", async (socket) => {
     io.emit("leaving-vc-update", data);
   });
 
+  //============= FRIEND REQ ==============
+
+  socket.on("friendReqArrived", async (data) => {
+    const from_user = await User.findOne({ _id: data?.from });
+    const to_user = await User.findOne({ uniqueCode: data?.to });
+
+    const stringId = to_user._id.toString();
+    const toSocketId = allUsers.get(stringId);
+    console.log(toSocketId);
+
+    if (toSocketId) {
+      io.to(toSocketId).emit("friendReqCame", {
+        from_user,
+      });
+    }
+  });
+
+  //============= REJECTED REQ ==============
+
+  socket.on("rejected-call", async (data) => {
+    const { from, to } = data;
+
+    const from_user = await User.findById(from); // req.user
+
+    const toSocketId = allUsers.get(to);
+    console.log(toSocketId);
+
+    if (toSocketId) {
+      io.to(toSocketId).emit("call-rejected", {
+        from_user,
+      });
+    }
+  });
+
   socket.on("end", async (data) => {
     // Find user by ID and set status as offline
     if (data.user_id) {

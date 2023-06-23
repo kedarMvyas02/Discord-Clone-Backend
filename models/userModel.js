@@ -27,6 +27,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please fill the password field"],
     },
+    phoneNumber: {
+      type: Number,
+    },
     passwordResetToken: { type: String },
   },
   {
