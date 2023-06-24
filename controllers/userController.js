@@ -50,7 +50,7 @@ const JWTokenGenerator = async (user) => {
   return accessToken;
 };
 
-// register a user
+/////////// REGISTER USER //////////////
 const registerUser = asyncHandler(async (req, res, next) => {
   const { name, email, password, userImage } = req.body;
   const uniqueCode = await generateUniqueCode();
@@ -174,7 +174,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
   }
 });
 
-// login user with assigning a jwtoken
+/////////// LOGIN USER //////////////
 const loginUser = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -203,7 +203,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
   }
 });
 
-// update user only if same user is logged in
+/////////// UPDATE USER //////////////
 const updateUser = asyncHandler(async (req, res, next) => {
   const user = await User.findByIdAndUpdate(req.user.id, req.body, {
     new: true,
@@ -214,7 +214,7 @@ const updateUser = asyncHandler(async (req, res, next) => {
   });
 });
 
-// deletes user only if same user is logged in
+/////////// DELETE USER //////////////
 const deleteUser = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password)
@@ -253,7 +253,7 @@ const deleteUser = asyncHandler(async (req, res, next) => {
   }
 });
 
-// sends a email with a token for authentication to change password
+/////////// FORGOT PASSWORD //////////////
 const forgotPassword = asyncHandler(async (req, res, next) => {
   const email = req.body.email;
   if (!email) return next(new AppError("Email field is compulsary", 400));
@@ -288,7 +288,7 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
   }
 });
 
-// checks forgotpassword token and then resets password
+/////////// RESEST PASSWORD //////////////
 const resetPassword = asyncHandler(async (req, res, next) => {
   const { password, passwordConfirm } = req.body;
   if (!password || !passwordConfirm) {
@@ -332,6 +332,7 @@ const resetPassword = asyncHandler(async (req, res, next) => {
   }
 });
 
+/////////// GET USER BY ID //////////////
 const getUser = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
   if (id) {
@@ -352,6 +353,7 @@ const getUser = asyncHandler(async (req, res, next) => {
   }
 });
 
+/////////// SEND FRIEND REQUEST //////////////
 const sendFriendRequest = asyncHandler(async (req, res, next) => {
   const { uniqueCode } = req.body;
   const friend = await User.findOne({ uniqueCode });
@@ -389,6 +391,7 @@ const sendFriendRequest = asyncHandler(async (req, res, next) => {
   });
 });
 
+/////////// ACCEPT FRIEND REQUEST //////////////
 const acceptFriendRequest = asyncHandler(async (req, res, next) => {
   const { uniqueCode } = req.body;
 
@@ -498,6 +501,7 @@ const acceptFriendRequest = asyncHandler(async (req, res, next) => {
   });
 });
 
+/////////// GET ALL FRIENDS //////////////
 const getFriends = asyncHandler(async (req, res, next) => {
   // const name = req.query.name;
   // const regex = new RegExp(name, "i");
@@ -536,6 +540,7 @@ const getFriends = asyncHandler(async (req, res, next) => {
   });
 });
 
+/////////// GET PENDING FRIEND REQUEST //////////////
 const getPendingRequests = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({ _id: req.user.id });
 
@@ -562,6 +567,7 @@ const getPendingRequests = asyncHandler(async (req, res, next) => {
   });
 });
 
+/////////// GET ARRIVED FRIEND REQUEST //////////////
 const getArrivedFriendRequests = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({ _id: req.user.id });
 
@@ -585,6 +591,7 @@ const getArrivedFriendRequests = asyncHandler(async (req, res, next) => {
   });
 });
 
+/////////// REJECT FRIEND REQUEST //////////////
 const rejectFriendReq = asyncHandler(async (req, res, next) => {
   const { uniqueCode } = req.body;
 
@@ -610,6 +617,7 @@ const rejectFriendReq = asyncHandler(async (req, res, next) => {
   });
 });
 
+/////////// CANCEL FRIEND REQUEST //////////////
 const cancelFriendReq = asyncHandler(async (req, res, next) => {
   const { uniqueCode } = req.body;
 
@@ -635,6 +643,7 @@ const cancelFriendReq = asyncHandler(async (req, res, next) => {
   });
 });
 
+/////////// REMOVE FRIEND //////////////
 const removeFriend = asyncHandler(async (req, res, next) => {
   const { uniqueCode } = req.body;
 

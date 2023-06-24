@@ -11,7 +11,7 @@ const User = require("../models/userModel");
 const GroupMessage = require("../models/GroupMessageModel");
 require("dotenv").config();
 
-////////////////////////////////////////////////////// CREATE SERVER ////////////////////////////////////////////////////////////////////////////////
+/////////// CREATE SERVER //////////////
 const createServer = asyncHandler(async (req, res, next) => {
   // Cloudinary configuration
   cloudinary.config({
@@ -95,8 +95,7 @@ const createServer = asyncHandler(async (req, res, next) => {
   });
 });
 
-////////////////////////////////////////////////////// UPDATE SERVER ////////////////////////////////////////////////////////////////////////////////
-
+/////////// UPDATESERVER //////////////
 const updateServer = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
   const { name, avatar } = req.body;
@@ -129,8 +128,7 @@ const updateServer = asyncHandler(async (req, res, next) => {
   });
 });
 
-////////////////////////////////////////////////////// DELETE SERVER ////////////////////////////////////////////////////////////////////////////////
-
+/////////// DELETE SERVER //////////////
 const deleteServer = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
   if (!id) return next(new AppError("ID is not present in the parameter"));
@@ -164,8 +162,7 @@ const deleteServer = asyncHandler(async (req, res, next) => {
   }
 });
 
-////////////////////////////////////////////////////// GET SERVER ////////////////////////////////////////////////////////////////////////////////
-
+/////////// GET SERVER BY ID //////////////
 const getServer = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
   // let currServer;
@@ -199,8 +196,7 @@ const getServer = asyncHandler(async (req, res, next) => {
   });
 });
 
-////////////////////////////////////////////////////// GET JOINED SERVER ////////////////////////////////////////////////////////////////////////////////
-
+/////////// GET JOINED SERVERS //////////////
 const getJoinedServers = asyncHandler(async (req, res, next) => {
   const joinedServers = await Member.find({ user: req.user.id })
     .populate({
@@ -244,8 +240,7 @@ const getJoinedServers = asyncHandler(async (req, res, next) => {
   });
 });
 
-////////////////////////////////////////////////////// JOIN SERVER ////////////////////////////////////////////////////////////////////////////////
-
+/////////// JOIN A SERVER //////////////
 const joinServer = asyncHandler(async (req, res, next) => {
   const serverId = req.params.id;
   const code = req.body.uniqueCode;
@@ -287,8 +282,7 @@ const joinServer = asyncHandler(async (req, res, next) => {
   });
 });
 
-////////////////////////////////////////////////////// LEAVE SERVER ////////////////////////////////////////////////////////////////////////////////
-
+/////////// LEAVE A SERVER //////////////
 const leaveServer = asyncHandler(async (req, res, next) => {
   const serverId = req.params.id;
   const user = req.user.id;
@@ -300,7 +294,7 @@ const leaveServer = asyncHandler(async (req, res, next) => {
     user: req.user.id,
     server: serverId,
   });
-  
+
   if (!joinedServers)
     return next(new AppError("You haven't joined this server yet", 403));
 
@@ -319,8 +313,7 @@ const leaveServer = asyncHandler(async (req, res, next) => {
   });
 });
 
-////////////////////////////////////////////////////// LEAVE SERVER ////////////////////////////////////////////////////////////////////////////////
-
+/////////// GET MEMBERS OF SERVER //////////////
 const getMembers = asyncHandler(async (req, res, next) => {
   const serverId = req.params.id;
 
@@ -338,8 +331,7 @@ const getMembers = asyncHandler(async (req, res, next) => {
   });
 });
 
-////////////////////////////////////////////////////// PUBLIC SERVERS ////////////////////////////////////////////////////////////////////////////////
-
+/////////// GET ALL PUBLIC SERVERS //////////////
 const getPublicServers = asyncHandler(async (req, res, next) => {
   const publicServers = await Server.find({ privacy: "public" }).populate(
     "members"

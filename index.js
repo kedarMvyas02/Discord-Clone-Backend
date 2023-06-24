@@ -22,6 +22,7 @@ io.on("connection", async (socket) => {
   // const user_id = socket.handshake.query.user_id;
   // const dmId = socket.handshake.query.dmId;
 
+  //============= LOGGING-IN USER ==============
   socket.on("add-user", ({ user_id }) => {
     allUsers.set(user_id, socket.id);
     const filteredMap = new Map(
@@ -30,7 +31,7 @@ io.on("connection", async (socket) => {
     console.log(filteredMap);
   });
 
-  // Handle incoming text messages
+  //============= PRIVATE CHATTING ==============
   socket.on("text_message", async (data) => {
     const { from, to, message } = data;
 
@@ -81,7 +82,6 @@ io.on("connection", async (socket) => {
   });
 
   //============= SERVER CHATTING ==============
-
   socket.on("channel-message", async (data) => {
     const { from, to, server, message } = data;
     const from_user = await User.findById(from); // req.user
@@ -166,13 +166,11 @@ io.on("connection", async (socket) => {
   });
 
   //============= USER LEAVING VC ==============
-
   socket.on("leaving-vc", async (data) => {
     io.emit("leaving-vc-update", data);
   });
 
   //============= FRIEND REQ ==============
-
   socket.on("friendReqArrived", async (data) => {
     const from_user = await User.findOne({ _id: data?.from });
     const to_user = await User.findOne({ uniqueCode: data?.to });
@@ -189,7 +187,6 @@ io.on("connection", async (socket) => {
   });
 
   //============= REJECTED REQ ==============
-
   socket.on("rejected-call", async (data) => {
     const { from, to } = data;
 
@@ -205,15 +202,7 @@ io.on("connection", async (socket) => {
     }
   });
 
-  socket.on("end", async (data) => {
-    // Find user by ID and set status as offline
-    if (data.user_id) {
-      await User.findByIdAndUpdate(data.user_id, { status: "Offline" });
-    }
-
-    // broadcast to all conversation rooms of this user that this user is offline (disconnected)
-
-    console.log("closing connection");
+  socket.on("end", () => {
     socket.disconnect(0);
   });
 });
