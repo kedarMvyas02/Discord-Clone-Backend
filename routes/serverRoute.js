@@ -10,19 +10,14 @@ const GroupMessageController = require("../controllers/groupMessageController");
 const searchFunctionalities = require("../controllers/searchFunctionalities");
 const router = express.Router();
 
-//////////////////////////////////////////////////////// SERVER ROUTES ///////////////////////////////////////////////////////////////////////////////
-
+/////////// SERVER ROUTES ////////////
 router.post(
   "/createServer",
   validateToken,
   uploadPhoto,
   serverController.createServer
 );
-router.patch(
-  "/updateServer/:id?",
-  validateToken,
-  serverController.updateServer
-);
+router.post("/updateServer/:id?", validateToken, serverController.updateServer);
 router.post("/deleteServer/:id?", validateToken, serverController.deleteServer);
 router.get("/getServer/:id?", validateToken, serverController.getServer);
 
@@ -44,7 +39,12 @@ router.post(
   validateToken,
   textChannelController.createTextChannel
 );
-router.delete(
+router.post(
+  "/updateTextChannel/:id?",
+  validateToken,
+  textChannelController.updateTextChannel
+);
+router.post(
   "/deleteTextChannel/:id?",
   validateToken,
   textChannelController.deleteTextChannel
@@ -61,7 +61,12 @@ router.post(
   validateToken,
   voiceChannelController.createVoiceChannel
 );
-router.delete(
+router.post(
+  "/updateVoiceChannel/:id?",
+  validateToken,
+  voiceChannelController.updateVoiceChannel
+);
+router.post(
   "/deleteVoiceChannel/:id?",
   validateToken,
   voiceChannelController.deleteVoiceChannel

@@ -19,7 +19,7 @@ const createServer = asyncHandler(async (req, res, next) => {
     api_key: process.env.CLOUD_API_KEY,
     api_secret: process.env.CLOUD_API_SECRET,
   });
-  const { name, avatar } = req.body;
+  const { name, avatar, description, privacy, serverType } = req.body;
   if (!name) return next(new AppError("please write name of the server", 400));
   if (!avatar) return next(new AppError("please add an image", 400));
 
@@ -34,6 +34,9 @@ const createServer = asyncHandler(async (req, res, next) => {
     name,
     owner: req.user.id,
     avatar,
+    description,
+    privacy,
+    serverType,
   });
 
   await Member.create({

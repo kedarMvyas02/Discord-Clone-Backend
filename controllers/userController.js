@@ -505,7 +505,6 @@ const acceptFriendRequest = asyncHandler(async (req, res, next) => {
 const getFriends = asyncHandler(async (req, res, next) => {
   // const name = req.query.name;
   // const regex = new RegExp(name, "i");
-
   const friends = await Friend.find({
     user: req.user.id,
     accepted: true,
@@ -547,15 +546,16 @@ const getPendingRequests = asyncHandler(async (req, res, next) => {
   const friends = await Friend.find({ user: user._id, accepted: false })
     .populate("user")
     .populate("friend");
-  if (friends.length == 0)
-    return next(
-      new AppError(
-        "You don't have any Pending Friend Requests, dw i'm your friend",
-        404
-      )
-    );
 
-  const friendsNames = friends.map((friend) => ({
+  // if (friends.length == 0)
+  //   return next(
+  //     new AppError(
+  //       "You don't have any Pending Friend Requests, dw i'm your friend",
+  //       404
+  //     )
+  //   );
+
+  const friendsNames = friends?.map((friend) => ({
     _id: friend.friend._id,
     friend: friend.friend.name,
     uniqueCode: friend.friend.uniqueCode,
@@ -574,10 +574,11 @@ const getArrivedFriendRequests = asyncHandler(async (req, res, next) => {
   const friends = await Friend.find({ friend: user._id, accepted: false })
     .populate("user")
     .populate("friend");
-  if (friends.length == 0)
-    return next(
-      new AppError("You don't have any Arrived Friend Requests", 404)
-    );
+
+  // if (friends.length == 0)
+  //   return next(
+  //     new AppError("You don't have any Arrived Friend Requests", 404)
+  //   );
 
   const friendsNames = friends.map((friend) => ({
     _id: friend.user._id,

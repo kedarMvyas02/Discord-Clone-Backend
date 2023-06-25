@@ -35,31 +35,50 @@ const createTextChannel = asyncHandler(async (req, res, next) => {
   });
 });
 
+/////////// UPDATE TEXT CHANNEL //////////////
+const updateTextChannel = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+  const { name } = req.body;
+
+  if (!id) return next(new AppError("ID is not present in the parameter", 400));
+  if (!mongoose.Types.ObjectId.isValid(id))
+    return next(new AppError("ID is invalid", 400));
+
+  const currTextChannel = await TextChannel.findById(id);
+  if (!currTextChannel)
+    return next(new AppError("Text Channel not found", 404));
+
+  const updated = await TextChannel.findOneAndUpdate(
+    { _id: id },
+    { name },
+    { new: true }
+  );
+
+  if (!updated) return next(new AppError("Text Channel didn't updated", 500));
+
+  return res.status(200).json({
+    message: "Text Channel Updated Successfully",
+    _id: updated._id,
+    name: updated.name,
+  });
+});
+
 ////////////////////////////////////////////////////// DELETE TEXT CHANNEL ////////////////////////////////////////////////////////////////////////////////
 
 const deleteTextChannel = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
   if (!id) return next(new AppError("ID is not present in the parameter"));
 
-  const currServer = await Server.findById(id);
-  if (!currServer) return next(new AppError("Server not found", 404));
-
-  if (currServer.owner.toString() !== req.user.id) {
-    return next(
-      new AppError("You are not authorized to delete this server", 401)
-    );
-  }
-
-  const deleted = await currServer.deleteOne({ id });
+  const deleted = await TextChannel.findByIdAndDelete(id, { new: true });
 
   if (deleted) {
     // TODO delete channels, messages, members...
 
     return res.status(200).json({
-      message: "Server has been deleted successfully",
+      message: "Text Channel has been deleted successfully",
     });
   } else {
-    return next(new AppError("Server has not been deleted", 500));
+    return next(new AppError("Text Channel has not been deleted", 500));
   }
 });
 
@@ -79,6 +98,7 @@ const getTextChannel = asyncHandler(async (req, res, next) => {
 
 module.exports = {
   createTextChannel,
-  deleteTextChannel,
   getTextChannel,
+  updateTextChannel,
+  deleteTextChannel,
 };

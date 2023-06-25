@@ -76,11 +76,51 @@ const createVoiceChannel = asyncHandler(async (req, res, next) => {
 
 ////////////////////////////////////////////////////// UPDATE VOICE CHANNEL ////////////////////////////////////////////////////////////////////////////////
 
-const updateVoiceChannel = asyncHandler(async (req, res, next) => {});
+const updateVoiceChannel = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+  const { name } = req.body;
+
+  if (!id) return next(new AppError("ID is not present in the parameter", 400));
+  if (!mongoose.Types.ObjectId.isValid(id))
+    return next(new AppError("ID is invalid", 400));
+
+  const currVoiceChannel = await VoiceChannel.findById(id);
+  if (!currVoiceChannel)
+    return next(new AppError("Voice Channel not found", 404));
+
+  const updated = await VoiceChannel.findOneAndUpdate(
+    { _id: id },
+    { name },
+    { new: true }
+  );
+
+  if (!updated) return next(new AppError("Voice Channel didn't updated", 500));
+
+  return res.status(200).json({
+    message: "Voice Channel Updated Successfully",
+    _id: updated._id,
+    name: updated.name,
+  });
+});
 
 ////////////////////////////////////////////////////// DELETE VOICE CHANNEL ////////////////////////////////////////////////////////////////////////////////
 
-const deleteVoiceChannel = asyncHandler(async (req, res, next) => {});
+const deleteVoiceChannel = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+  if (!id) return next(new AppError("ID is not present in the parameter"));
+
+  const deleted = await VoiceChannel.findByIdAndDelete(id, { new: true });
+
+  if (deleted) {
+    // TODO delete channels, messages, members...
+
+    return res.status(200).json({
+      message: "Text Channel has been deleted successfully",
+    });
+  } else {
+    return next(new AppError("Text Channel has not been deleted", 500));
+  }
+});
 
 ////////////////////////////////////////////////////// GET VOICE CHANNEL ////////////////////////////////////////////////////////////////////////////////
 
