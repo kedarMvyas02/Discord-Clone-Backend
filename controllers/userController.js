@@ -375,7 +375,7 @@ const sendFriendRequest = asyncHandler(async (req, res, next) => {
     accepted: true,
   });
   if (friendExists)
-    return next(new AppError("You both are friend already!", 400));
+    return next(new AppError("You both are friends already!", 400));
 
   const done = await Friend.create({
     user: req.user.id,

@@ -149,7 +149,6 @@ const deleteServer = asyncHandler(async (req, res, next) => {
   const allTextChannels = await TextChannel.find({ server: id });
 
   if (deleted) {
-    // TODO delete channels, messages, members...
     await TextChannel.deleteMany({ server: id });
     await VoiceChannel.deleteMany({ server: id });
     await Member.deleteMany({ server: id });
@@ -186,7 +185,7 @@ const getServer = asyncHandler(async (req, res, next) => {
       select: "user _id server",
       populate: {
         path: "user",
-        select: "name uniqueCode _id userImage",
+        select: "name uniqueCode _id userImage email createdAt phoneNumber",
       },
     })
     .lean();

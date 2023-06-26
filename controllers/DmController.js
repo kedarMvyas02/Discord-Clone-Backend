@@ -46,14 +46,6 @@ const removeFromDmHandler = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({ _id: id });
   if (!user) return next(new AppError("User not found", 404));
 
-  const friendExists = await Friend.findOne({
-    user: req.user.id,
-    friend: user._id,
-    accepted: true,
-  });
-  if (!friendExists)
-    return next(new AppError(`You are not friend with ${user.name}`));
-
   const alreadyExists = await Dm.findOne({
     user: req.user.id,
     friend: user._id,

@@ -72,7 +72,7 @@ const deleteTextChannel = asyncHandler(async (req, res, next) => {
   const deleted = await TextChannel.findByIdAndDelete(id, { new: true });
 
   if (deleted) {
-    // TODO delete channels, messages, members...
+    await GroupMessage.deleteMany({ channel: id });
 
     return res.status(200).json({
       message: "Text Channel has been deleted successfully",
