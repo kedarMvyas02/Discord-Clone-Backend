@@ -24,11 +24,5 @@ const groupMessageSchema = new mongoose.Schema(
   }
 );
 
-groupMessageSchema.virtual("user", {
-  ref: "User",
-  localField: "sender",
-  foreignField: "_id",
-});
-
 const GroupMessage = new mongoose.model("GroupMessage", groupMessageSchema);
 module.exports = GroupMessage;

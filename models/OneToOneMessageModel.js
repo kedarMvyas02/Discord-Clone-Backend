@@ -17,6 +17,10 @@ const oneToOneMessageSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    unread: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     toJSON: { virtuals: true },
@@ -24,12 +28,6 @@ const oneToOneMessageSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
-oneToOneMessageSchema.virtual("user", {
-  ref: "User",
-  localField: "sender",
-  foreignField: "_id",
-});
 
 const OneToOneMessage = new mongoose.model(
   "OneToOneMessage",

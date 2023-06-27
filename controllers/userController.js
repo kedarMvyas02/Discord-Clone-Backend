@@ -667,6 +667,10 @@ const removeFriend = asyncHandler(async (req, res, next) => {
 
   await Friend.findByIdAndDelete({ _id: requestExists._id });
   await Friend.findByIdAndDelete({ _id: requestExists2._id });
+  await Dm.deleteOne({
+    user: req.user.id,
+    friend: friend._id,
+  });
   const done = await Dm.deleteOne({
     user: friend._id,
     friend: req.user.id,

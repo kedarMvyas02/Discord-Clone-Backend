@@ -24,28 +24,30 @@ io.on("connection", async (socket) => {
 
   //============= LOGGING-IN USER ==============
   socket.on("add-user", ({ user_id }) => {
-    allUsers.set(user_id, socket.id);
-    const filteredMap = new Map(
-      [...allUsers].filter(([key]) => key !== undefined)
-    );
-    console.log(filteredMap);
+    allUsers.set(user_id, { socketId: socket.id, status: "online" });
+    allUsers.forEach((value, key) => {
+      if (key === undefined) {
+        allUsers.delete(key);
+      }
+    });
+    console.log(allUsers);
   });
 
   //============= PRIVATE CHATTING ==============
   socket.on("text_message", async (data) => {
     const { from, to, message } = data;
 
-    const from_user = await User.findById(from); // req.user
-    const to_user = await User.findById(to); // friend
+    const from_user = await User.findById(from);
+    const to_user = await User.findById(to);
 
     const dmExist = await Dm.findOne({
-      user: to_user, // friend
-      friend: from_user, // req.user
+      user: to_user,
+      friend: from_user,
     });
     if (!dmExist) {
       await Dm.create({
-        user: to_user, // friend
-        friend: from_user, // req.user
+        user: to_user,
+        friend: from_user,
       });
     }
 
@@ -72,10 +74,10 @@ io.on("connection", async (socket) => {
     }
 
     const toSocketId = allUsers.get(to);
-    console.log(toSocketId);
+    console.log(toSocketId.socketId);
 
-    if (toSocketId) {
-      io.to(toSocketId).emit("navoMessage", {
+    if (toSocketId.socketId) {
+      io.to(toSocketId.socketId).emit("navoMessage", {
         populatedChat,
       });
     }
@@ -84,7 +86,7 @@ io.on("connection", async (socket) => {
   //============= SERVER CHATTING ==============
   socket.on("channel-message", async (data) => {
     const { from, to, server, message } = data;
-    const from_user = await User.findById(from); // req.user
+    const from_user = await User.findById(from);
 
     let populatedChat;
     try {
@@ -113,7 +115,7 @@ io.on("connection", async (socket) => {
     serverMembers.map((item) => {
       const userId = item.user.toString();
       const userToken = allUsers.get(userId);
-      temp.push(userToken);
+      temp.push(userToken.socketId);
     });
 
     if (temp) {
@@ -129,13 +131,13 @@ io.on("connection", async (socket) => {
   socket.on("private-call", async (data) => {
     const { from, to } = data;
 
-    const from_user = await User.findById(from); // req.user
+    const from_user = await User.findById(from);
 
     const toSocketId = allUsers.get(to);
-    console.log(toSocketId);
+    console.log(toSocketId.socketId);
 
-    if (toSocketId) {
-      io.to(toSocketId).emit("incoming-call", {
+    if (toSocketId.socketId) {
+      io.to(toSocketId.socketId).emit("incoming-call", {
         from_user,
       });
     }
@@ -151,7 +153,7 @@ io.on("connection", async (socket) => {
     serverMembers.map((item) => {
       const userId = item.user.toString();
       const userToken = allUsers.get(userId);
-      temp.push(userToken);
+      temp.push(userToken.socketId);
     });
 
     if (temp) {
@@ -177,10 +179,10 @@ io.on("connection", async (socket) => {
 
     const stringId = to_user._id.toString();
     const toSocketId = allUsers.get(stringId);
-    console.log(toSocketId);
+    console.log(toSocketId.socketId);
 
-    if (toSocketId) {
-      io.to(toSocketId).emit("friendReqCame", {
+    if (toSocketId.socketId) {
+      io.to(toSocketId.socketId).emit("friendReqCame", {
         from_user,
       });
     }
@@ -190,20 +192,26 @@ io.on("connection", async (socket) => {
   socket.on("rejected-call", async (data) => {
     const { from, to } = data;
 
-    const from_user = await User.findById(from); // req.user
+    const from_user = await User.findById(from);
 
     const toSocketId = allUsers.get(to);
-    console.log(toSocketId);
+    console.log(toSocketId.socketId);
 
-    if (toSocketId) {
-      io.to(toSocketId).emit("call-rejected", {
+    if (toSocketId.socketId) {
+      io.to(toSocketId.socketId).emit("call-rejected", {
         from_user,
       });
     }
   });
 
-  socket.on("end", () => {
-    socket.disconnect(0);
+  socket.on("disconnect", () => {
+    allUsers.forEach((value, key) => {
+      if (value.socketId === socket.id) {
+        value.status = "offline";
+        // allUsers.delete(key);
+        console.log(allUsers);
+      }
+    });
   });
 });
 //////////////////////////////////////////////////////////////////////////////////

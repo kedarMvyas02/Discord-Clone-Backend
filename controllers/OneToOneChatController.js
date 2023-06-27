@@ -52,10 +52,6 @@ const getPinnedMessages = asyncHandler(async (req, res, next) => {
       path: "reciever",
       select: "name _id uniqueCode email userImage status createdAt",
     })
-    .populate({
-      path: "user",
-      select: "name _id uniqueCode email userImage status createdAt",
-    })
     .sort({ createdAt: 1 });
 
   if (!messages) {
@@ -72,7 +68,7 @@ const pinMessage = asyncHandler(async (req, res, next) => {
 
   const messages = await OneToOneMessage.findByIdAndUpdate(id, {
     pinned: true,
-  }).populate("user");
+  }).populate("sender");
 
   return res.status(200).json({
     messages,
@@ -84,7 +80,7 @@ const deletePinnedMessage = asyncHandler(async (req, res, next) => {
 
   const messages = await OneToOneMessage.findByIdAndUpdate(id, {
     pinned: false,
-  }).populate("user");
+  }).populate("sender");
 
   return res.status(200).json({
     messages,

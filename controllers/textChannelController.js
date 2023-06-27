@@ -3,6 +3,7 @@ const AppError = require("../ErrorHandlers/AppError");
 const Server = require("../models/serverModel");
 const { default: mongoose } = require("mongoose");
 const TextChannel = require("../models/textChannelModel");
+const GroupMessage = require("../models/GroupMessageModel");
 
 ////////////////////////////////////////////////////// CREATE TEXT CHANNEL ////////////////////////////////////////////////////////////////////////////////
 

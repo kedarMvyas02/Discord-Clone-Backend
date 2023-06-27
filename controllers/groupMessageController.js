@@ -54,13 +54,9 @@ const getPinnedMessages = asyncHandler(async (req, res, next) => {
     channel: id,
     pinned: true,
   })
-    .populate("user")
+    .populate("sender")
     .sort({ createdAt: 1 })
     .lean();
-
-  // if (messages.length < 1) {
-  //   return next(new AppError("There are no messages", 500));
-  // }
 
   return res.status(200).json({
     messages,

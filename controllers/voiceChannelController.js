@@ -112,8 +112,6 @@ const deleteVoiceChannel = asyncHandler(async (req, res, next) => {
   const deleted = await VoiceChannel.findByIdAndDelete(id, { new: true });
 
   if (deleted) {
-    await GroupMessage.deleteMany({ channel: id });
-
     return res.status(200).json({
       message: "Text Channel has been deleted successfully",
     });
