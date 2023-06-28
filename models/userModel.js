@@ -30,6 +30,11 @@ const userSchema = new mongoose.Schema(
     phoneNumber: {
       type: Number,
     },
+    status: {
+      type: String,
+      enum: ["online", "offline"],
+      default: "offline",
+    },
     passwordResetToken: { type: String },
   },
   {

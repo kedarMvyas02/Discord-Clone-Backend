@@ -4,6 +4,7 @@ const User = require("../models/userModel");
 const Friend = require("../models/friendsModel");
 const { default: mongoose } = require("mongoose");
 const Dm = require("../models/DmModel");
+const OneToOneMessage = require("../models/OneToOneMessageModel");
 
 const addToDmHandler = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
@@ -68,12 +69,26 @@ const getDmFriends = asyncHandler(async (req, res, next) => {
   if (!dmFriends) return next(new AppError(`No user exist in your dm`));
 
   const data = dmFriends.map((item) => {
-    const { name, uniqueCode, email, userImage, _id } = item.friend;
-    return { _id, name, uniqueCode, email, userImage };
+    const { name, uniqueCode, email, userImage, _id, status } = item.friend;
+    return { _id, name, uniqueCode, email, userImage, status };
   });
 
-  return res.status(200).json({
-    dmFriends: data,
+  const promises = data?.map(async (val) => {
+    const unreadMessages = await OneToOneMessage.find({
+      $or: [
+        { sender: req.user.id, reciever: val._id },
+        { sender: val._id, reciever: req.user.id },
+      ],
+      read: false,
+    }).lean();
+
+    return { ...val, unreadMessages: unreadMessages?.length };
+  });
+
+  Promise.all(promises).then((updatedData) => {
+    return res.status(200).json({
+      dmFriends: updatedData,
+    });
   });
 });
 

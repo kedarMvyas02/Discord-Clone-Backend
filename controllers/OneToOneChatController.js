@@ -104,10 +104,45 @@ const deleteMessage = asyncHandler(async (req, res, next) => {
   });
 });
 
+const readMessages = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+
+  await OneToOneMessage.updateMany({
+    $or: [
+      { sender: req.user.id, reciever: id },
+      { sender: id, reciever: req.user.id },
+    ],
+    read: true,
+  });
+  console.log("i was here");
+
+  return res.status(200).json({
+    msg: "Message read Successfully",
+  });
+});
+
+const getUnreadMessages = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+
+  const unreadMessages = await OneToOneMessage.find({
+    $or: [
+      { sender: req.user.id, reciever: id },
+      { sender: id, reciever: req.user.id },
+    ],
+    read: false,
+  }).lean();
+
+  return res.status(200).json({
+    unreadMessages,
+  });
+});
+
 module.exports = {
   getDmMessages,
   getPinnedMessages,
   deleteMessage,
   pinMessage,
   deletePinnedMessage,
+  readMessages,
+  getUnreadMessages,
 };

@@ -17,9 +17,9 @@ const oneToOneMessageSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    unread: {
+    read: {
       type: Boolean,
-      default: true,
+      default: false,
     },
   },
   {

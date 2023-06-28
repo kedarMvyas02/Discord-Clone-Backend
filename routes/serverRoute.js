@@ -91,7 +91,7 @@ router.get(
   validateToken,
   voiceChannelController.getJoinedInVoiceChannel
 );
-//////////////////////////////////////////////////////// CHANNEL MESSAGE ROUTES /////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////// GROUP MESSAGE ROUTES /////////////////////////////////////////////////////////////////////////
 
 router.get(
   "/getChannelMessages/:id?",
@@ -119,7 +119,7 @@ router.post(
   GroupMessageController.deletePinnedMessage
 );
 
-//////////////////////////////////////////////////////// DM ROUTES /////////////////////////////////////////////////////////////////////////
+///////////////////////// DM ROUTES ///////////////////////////
 
 router.post("/addToDm/:id?", validateToken, dmController.addToDmHandler);
 router.post(
@@ -128,6 +128,9 @@ router.post(
   dmController.removeFromDmHandler
 );
 router.get("/getDmFriends", validateToken, dmController.getDmFriends);
+
+//////////////////// ONE TO ONE CHAT ROUTES ///////////////
+
 router.get(
   "/getDmMessages/:id?",
   validateToken,
@@ -152,6 +155,16 @@ router.post(
   "/deleteDmPinnedMessage/:id?",
   validateToken,
   OneToOneChatController.deletePinnedMessage
+);
+router.post(
+  "/readMessages/:id?",
+  validateToken,
+  OneToOneChatController.readMessages
+);
+router.get(
+  "/getUnreadMessages/:id?",
+  validateToken,
+  OneToOneChatController.getUnreadMessages
 );
 
 //////////////////////////////////////////////////////// DM ROUTES /////////////////////////////////////////////////////////////////////////

@@ -16,6 +16,10 @@ const groupMessageSchema = new mongoose.Schema(
     pinned: {
       type: Boolean,
     },
+    read: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     toJSON: { virtuals: true },

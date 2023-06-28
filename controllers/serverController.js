@@ -185,7 +185,8 @@ const getServer = asyncHandler(async (req, res, next) => {
       select: "user _id server",
       populate: {
         path: "user",
-        select: "name uniqueCode _id userImage email createdAt phoneNumber",
+        select:
+          "name uniqueCode _id userImage email createdAt phoneNumber status",
       },
     })
     .lean();

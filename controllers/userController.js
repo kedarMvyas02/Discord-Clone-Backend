@@ -531,6 +531,7 @@ const getFriends = asyncHandler(async (req, res, next) => {
       uniqueCode: friend.friend.uniqueCode,
       userImage: friend.friend.userImage,
       roomCode: friend.roomCode,
+      status: friend.status,
     };
   });
 
