@@ -16,9 +16,8 @@ const groupMessageSchema = new mongoose.Schema(
     pinned: {
       type: Boolean,
     },
-    read: {
-      type: Boolean,
-      default: false,
+    unread: {
+      type: [mongoose.Schema.Types.ObjectId],
     },
   },
   {

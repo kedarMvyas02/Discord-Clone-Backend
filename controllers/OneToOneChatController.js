@@ -112,9 +112,8 @@ const readMessages = asyncHandler(async (req, res, next) => {
       { sender: req.user.id, reciever: id },
       { sender: id, reciever: req.user.id },
     ],
-    read: true,
+    $set: { read: [] },
   });
-  console.log("i was here");
 
   return res.status(200).json({
     msg: "Message read Successfully",
@@ -125,11 +124,9 @@ const getUnreadMessages = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
 
   const unreadMessages = await OneToOneMessage.find({
-    $or: [
-      { sender: req.user.id, reciever: id },
-      { sender: id, reciever: req.user.id },
-    ],
-    read: false,
+    sender: id,
+    reciever: req.user.id,
+    read: { $in: [req.user.id] },
   }).lean();
 
   return res.status(200).json({

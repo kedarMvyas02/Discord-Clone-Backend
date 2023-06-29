@@ -99,6 +99,11 @@ router.get(
   GroupMessageController.getChannelMessages
 );
 router.post(
+  "/readChannelMessages/:id?",
+  validateToken,
+  GroupMessageController.readChannelMessages
+);
+router.post(
   "/deleteMessage/:id?",
   validateToken,
   GroupMessageController.deleteMessage

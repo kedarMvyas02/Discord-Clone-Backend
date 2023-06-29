@@ -75,11 +75,9 @@ const getDmFriends = asyncHandler(async (req, res, next) => {
 
   const promises = data?.map(async (val) => {
     const unreadMessages = await OneToOneMessage.find({
-      $or: [
-        { sender: req.user.id, reciever: val._id },
-        { sender: val._id, reciever: req.user.id },
-      ],
-      read: false,
+      sender: val._id,
+      reciever: req.user.id,
+      read: { $in: [req.user.id] },
     }).lean();
 
     return { ...val, unreadMessages: unreadMessages?.length };

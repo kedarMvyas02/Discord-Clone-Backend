@@ -18,8 +18,7 @@ const oneToOneMessageSchema = new mongoose.Schema(
       default: false,
     },
     read: {
-      type: Boolean,
-      default: false,
+      type: [mongoose.Types.ObjectId],
     },
   },
   {

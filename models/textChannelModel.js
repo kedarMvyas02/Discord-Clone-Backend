@@ -18,5 +18,11 @@ const textChannelSchema = new mongoose.Schema(
   }
 );
 
+textChannelSchema.virtual("grpMessages", {
+  ref: "GroupMessage",
+  localField: "_id",
+  foreignField: "channel",
+});
+
 const TextChannel = new mongoose.model("TextChannel", textChannelSchema);
 module.exports = TextChannel;

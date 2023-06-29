@@ -174,7 +174,11 @@ const getServer = asyncHandler(async (req, res, next) => {
   const currServer = await Server.findById(id)
     .populate({
       path: "textChannels",
-      select: "name _id -server",
+      select: "name _id grpMessages -server",
+      populate: {
+        path: "grpMessages",
+        // select: "sender channel content unread",
+      },
     })
     .populate({
       path: "voiceChannels",
@@ -191,12 +195,30 @@ const getServer = asyncHandler(async (req, res, next) => {
     })
     .lean();
 
+  const updatedTextChannels = currServer?.textChannels?.map((item) => {
+    const { grpMessages, ...rest } = item;
+    let counter = 0;
+    grpMessages?.map((val) => {
+      const kedar = val.unread.filter(
+        (id) => id == new mongoose.Types.ObjectId(req.user.id)
+      );
+      if (kedar) counter++;
+    });
+
+    return { unreadMessages: counter, ...rest };
+  });
+
   if (!currServer) return next(new AppError("Server not found", 404));
 
   return res.status(200).json({
     message: "Server found successfully",
-    server: currServer,
+    server: { ...currServer, textChannels: updatedTextChannels },
   });
+
+  // return res.status(200).json({
+  //   message: "Server found successfully",
+  //   server: currServer,
+  // });
 });
 
 /////////// GET JOINED SERVERS //////////////

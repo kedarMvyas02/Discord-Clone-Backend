@@ -96,10 +96,30 @@ const deletePinnedMessage = asyncHandler(async (req, res, next) => {
   });
 });
 
+const readChannelMessages = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+
+  const kedar = await GroupMessage.updateMany(
+    {
+      channel: id,
+    },
+    {
+      $pull: {
+        read: req.user.id,
+      },
+    }
+  );
+
+  return res.status(200).json({
+    msg: "Message read Successfully",
+  });
+});
+
 module.exports = {
   getChannelMessages,
   deleteMessage,
   getPinnedMessages,
   pinMessage,
   deletePinnedMessage,
+  readChannelMessages,
 };

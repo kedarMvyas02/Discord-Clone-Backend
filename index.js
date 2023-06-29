@@ -34,6 +34,23 @@ io.on("connection", async (socket) => {
     io.emit("user-online");
   });
 
+  //============= USER TYPING PRIVATE CHATTING ==============
+  socket.on("typing-event", async (data) => {
+    const { from, to } = data;
+
+    const to_user = await User.findById(to);
+
+    const toSocketId = allUsers.get(to);
+    console.log(toSocketId);
+
+    if (toSocketId && to_user?.status === "online") {
+      io.to(toSocketId).emit("user-typing", {
+        from,
+        to,
+      });
+    }
+  });
+
   //============= PRIVATE CHATTING ==============
   socket.on("text_message", async (data) => {
     const { from, to, message } = data;
@@ -62,7 +79,6 @@ io.on("connection", async (socket) => {
           reciever: to_user._id,
           sender: from_user._id,
           content: message,
-          read: true,
         });
 
         populatedChat = await OneToOneMessage.populate(chat, [
@@ -88,11 +104,38 @@ io.on("connection", async (socket) => {
           reciever: to_user._id,
           sender: from_user._id,
           content: message,
-          read: false,
+          read: [to_user._id],
         });
       } catch (error) {
         console.log(error);
       }
+    }
+  });
+
+  //============= USER TYPING SERVER CHATTING ==============
+  socket.on("channel-typing-event", async (data) => {
+    const { from, to, server } = data;
+    const from_user = await User.findById(from);
+
+    const serverMembers = await Member.find({ server });
+
+    let temp = [];
+    serverMembers.map((item) => {
+      const userId = item.user.toString();
+      if (userId !== from_user._id.toString()) {
+        const userToken = allUsers.get(userId);
+        temp.push(userToken);
+      }
+    });
+
+    if (temp) {
+      temp.forEach((item) => {
+        io.to(item).emit("typing-channel", {
+          from: from_user?.name,
+          to,
+          server,
+        });
+      });
     }
   });
 
@@ -102,37 +145,46 @@ io.on("connection", async (socket) => {
     const from_user = await User.findById(from);
 
     let populatedChat;
-    try {
-      const chat = await GroupMessage.create({
-        sender: from_user._id,
-        channel: to,
-        content: message,
-      });
-      populatedChat = await GroupMessage.populate(chat, [
-        {
-          path: "sender",
-          select: "name _id uniqueCode email userImage status createdAt",
-        },
-        {
-          path: "channel",
-          select: "_id name",
-        },
-      ]);
-    } catch (error) {
-      console.log(error);
-    }
 
-    const serverMembers = await Member.find({ server });
+    const serverMembers = await Member.find({ server }).populate("user");
 
-    let temp = [];
-    serverMembers.map((item) => {
-      const userId = item.user.toString();
-      const userToken = allUsers.get(userId);
-      temp.push(userToken);
+    let onlineUsersSocketId = [];
+    let offlineUsers = [];
+
+    serverMembers?.map((item) => {
+      if (item.user.status === "online") {
+        const userId = item.user._id.toString();
+        const userToken = allUsers.get(userId);
+        onlineUsersSocketId.push(userToken);
+      } else {
+        const userId = item.user._id.toString();
+        offlineUsers.push(userId);
+      }
     });
 
-    if (temp) {
-      temp.forEach((item) => {
+    if (onlineUsersSocketId) {
+      try {
+        const chat = await GroupMessage.create({
+          sender: from_user._id,
+          channel: to,
+          content: message,
+          unread: [...offlineUsers],
+        });
+        populatedChat = await GroupMessage.populate(chat, [
+          {
+            path: "sender",
+            select: "name _id uniqueCode email userImage status createdAt",
+          },
+          {
+            path: "channel",
+            select: "_id name",
+          },
+        ]);
+      } catch (error) {
+        console.log(error);
+      }
+
+      onlineUsersSocketId?.forEach((item) => {
         io.to(item).emit("message", {
           populatedChat,
         });

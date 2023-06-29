@@ -24,7 +24,7 @@ memberSchema.virtual("servers", {
   ref: "Server",
   localField: "server",
   foreignField: "_id",
-}); // bad choice
+}); // bad choice TODO
 
 const Member = new mongoose.model("Member", memberSchema);
 module.exports = Member;
