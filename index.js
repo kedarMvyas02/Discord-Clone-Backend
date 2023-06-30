@@ -281,7 +281,6 @@ io.on("connection", async (socket) => {
     if (user !== null) {
       await User.findByIdAndUpdate(user, { status: "offline" }, { new: true });
       io.emit("user-online");
-      console.log("event emitted");
     }
 
     // const userArray = Array.from(allUsers).reduce((arr, [key, value]) => {

@@ -27,9 +27,9 @@ const hashToken = (token) => {
 const generateUniqueCode = async () => {
   // Generates a random 4-digit number between 1000 and 9999
   const code = Math.floor(1000 + Math.random() * 9000);
-  const codeInUse = await User.findOne({ uniqueCode: code });
+  const codeInUse = await User.find({ uniqueCode: code });
 
-  if (!codeInUse) {
+  if (codeInUse.length !== 0) {
     return generateUniqueCode();
   } else {
     return code;
@@ -65,8 +65,6 @@ const registerUser = asyncHandler(async (req, res, next) => {
   });
 
   if (user) {
-    // const message = `Hey ${user.name}, \n You have successfully registered in Discord chatting application :) \n  Thanks a lot xD for registering into our application`;
-
     const message = `
   <html>
     <head>
@@ -516,13 +514,13 @@ const getFriends = asyncHandler(async (req, res, next) => {
     .populate("user")
     .populate("friend");
 
-  if (friends.length == 0)
-    return next(
-      new AppError(
-        "You don't have any Friends, don't worry wumpus is your bff :)",
-        404
-      )
-    );
+  // if (friends.length == 0)
+  //   return next(
+  //     new AppError(
+  //       "You don't have any Friends, don't worry wumpus is your bff :)",
+  //       404
+  //     )
+  //   );
 
   const friendsNames = friends.map((friend) => {
     return {

@@ -105,10 +105,12 @@ const readChannelMessages = asyncHandler(async (req, res, next) => {
     },
     {
       $pull: {
-        read: req.user.id,
+        unread: req.user.id,
       },
     }
   );
+
+  console.log(kedar);
 
   return res.status(200).json({
     msg: "Message read Successfully",

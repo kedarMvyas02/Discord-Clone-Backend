@@ -199,10 +199,10 @@ const getServer = asyncHandler(async (req, res, next) => {
     const { grpMessages, ...rest } = item;
     let counter = 0;
     grpMessages?.map((val) => {
-      const kedar = val.unread.filter(
-        (id) => id == new mongoose.Types.ObjectId(req.user.id)
-      );
-      if (kedar) counter++;
+      const kedar = val.unread.filter((id) => id == req.user.id);
+      if (kedar?.length > 0) {
+        counter++;
+      }
     });
 
     return { unreadMessages: counter, ...rest };
@@ -229,19 +229,20 @@ const getJoinedServers = asyncHandler(async (req, res, next) => {
       select: "name _id avatar",
     })
     .lean();
-  if (joinedServers.length == 0)
-    return next(new AppError("You haven't joined any servers yet", 404));
 
-  const allServers = joinedServers.map((server) => {
+  // if (joinedServers.length == 0)
+  //   return next(new AppError("You haven't joined any servers yet", 404));
+
+  const allServers = joinedServers?.map((server) => {
     const { createdAt, updatedAt, __v, servers, _id, ...rest } = server;
     return {
-      _id: servers.map(({ _id }) => _id)[0],
+      _id: servers?.map(({ _id }) => _id)[0],
       // name: servers.map(({ name }) => name)[0],
       // avatar: servers.map(({ avatar }) => avatar)[0],
     };
   });
 
-  const temp = allServers.map((server) => server._id);
+  const temp = allServers?.map((server) => server?._id);
 
   const kedar = await Server.find({ _id: { $in: temp } })
     .populate("textChannels")
@@ -250,7 +251,7 @@ const getJoinedServers = asyncHandler(async (req, res, next) => {
     .exec();
 
   const responseWithChannels = {
-    allServers: kedar.map((server) => ({
+    allServers: kedar?.map((server) => ({
       _id: server._id,
       name: server.name,
       avatar: server.avatar,
@@ -321,7 +322,7 @@ const leaveServer = asyncHandler(async (req, res, next) => {
   });
 
   if (!joinedServers)
-    return next(new AppError("You haven't joined this server yet", 403));
+    return next(new AppError("You haven't joined this server yet", 400));
 
   const left = await Member.deleteOne({
     server: serverId,
@@ -349,7 +350,7 @@ const getMembers = asyncHandler(async (req, res, next) => {
     server: serverId,
   });
 
-  if (!allMembers) return next(new AppError("There are no members yet!", 403));
+  if (!allMembers) return next(new AppError("There are no members yet!", 404));
 
   return res.status(200).json({
     allMembers,
