@@ -195,6 +195,12 @@ const getServer = asyncHandler(async (req, res, next) => {
     })
     .lean();
 
+  const memberExist = currServer?.members?.filter((item) => {
+    return item?.user?._id.toString() === req.user.id;
+  });
+  if (memberExist.length === 0)
+    return next(new AppError("You haven't joined this server!", 400));
+
   const updatedTextChannels = currServer?.textChannels?.map((item) => {
     const { grpMessages, ...rest } = item;
     let counter = 0;
