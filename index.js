@@ -7,6 +7,7 @@ const OneToOneMessage = require("./models/OneToOneMessageModel");
 const Dm = require("./models/DmModel");
 const GroupMessage = require("./models/GroupMessageModel");
 const Member = require("./models/memeberModel");
+const axios = require("axios");
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -189,6 +190,63 @@ io.on("connection", async (socket) => {
           populatedChat,
         });
       });
+
+      // for chat gpt bot
+      if (message.startsWith("/chat")) {
+        const prompt = message.substring("/chat".length).trim();
+        console.log(typeof prompt);
+
+        const openaiApiKey = process.env.OPENAI_API_KEY;
+
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${openaiApiKey}`,
+        };
+
+        const data = {
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.7,
+        };
+
+        const response = await axios.post(
+          "https://api.openai.com/v1/chat/completions",
+          data,
+          { headers }
+        );
+
+        const answer = response?.data?.choices[0]?.message?.content;
+        const chatGpt = await User.findById("64a1e30e7ca55e598c6c1e06");
+
+        if (onlineUsersSocketId) {
+          try {
+            const chat = await GroupMessage.create({
+              sender: chatGpt._id,
+              channel: to,
+              content: answer,
+              unread: [...offlineUsers],
+            });
+            populatedChat = await GroupMessage.populate(chat, [
+              {
+                path: "sender",
+                select: "name _id uniqueCode email userImage status createdAt",
+              },
+              {
+                path: "channel",
+                select: "_id name",
+              },
+            ]);
+          } catch (error) {
+            console.log(error);
+          }
+
+          onlineUsersSocketId?.forEach((item) => {
+            io.to(item).emit("message", {
+              populatedChat,
+            });
+          });
+        }
+      }
     }
   });
 
