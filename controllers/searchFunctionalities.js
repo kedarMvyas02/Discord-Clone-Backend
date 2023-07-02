@@ -8,8 +8,8 @@ const messagesFinder = asyncHandler(async (req, res, next) => {
   const keyword = req.params.messages
     ? {
         $or: [
-          { name: { $regex: req.params.trainer, $options: "i" } },
-          { email: { $regex: req.params.trainer, $options: "i" } },
+          { name: { $regex: keyword, $options: "i" } },
+          { email: { $regex: keyword, $options: "i" } },
         ],
       }
     : {};

@@ -8,6 +8,7 @@ const dmController = require("../controllers/DmController");
 const OneToOneChatController = require("../controllers/OneToOneChatController");
 const GroupMessageController = require("../controllers/groupMessageController");
 const searchFunctionalities = require("../controllers/searchFunctionalities");
+const { getAnswerFromGpt } = require("../controllers/chatGptBot");
 const router = express.Router();
 
 /////////// SERVER ROUTES ////////////
@@ -176,5 +177,9 @@ router.get(
 
 router.get("/messageFinder/:messages", searchFunctionalities.messagesFinder);
 router.get("/searchServers", searchFunctionalities.searchServers);
+
+///////////////// SEARCH FROM GPT /////////////
+
+router.post("/getAnswerFromGpt", getAnswerFromGpt);
 
 module.exports = router;
