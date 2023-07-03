@@ -28,10 +28,6 @@ io.on("connection", async (socket) => {
   socket.on("add-user", async (data) => {
     allUsers.set(data?.user_id, socket.id);
     await User.findByIdAndUpdate(data?.user_id, { status: "online" });
-    const filteredMap = new Map(
-      [...allUsers].filter(([key]) => key !== undefined)
-    );
-    console.log(filteredMap);
     io.emit("user-online");
   });
 

@@ -683,6 +683,25 @@ const removeFriend = asyncHandler(async (req, res, next) => {
   });
 });
 
+/////////// READ ARRIVED FRIEND REQUEST //////////////
+const readArrivedFriendRequst = asyncHandler(async (req, res, next) => {
+  const user = await User.findOne({ _id: req.user.id });
+
+  await Friend.findByIdAndUpdate(
+    {
+      friend: user._id,
+      accepted: false,
+    },
+    {
+      read: true,
+    }
+  );
+
+  return res.status(200).json({
+    msg: "friend request readed",
+  });
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -699,4 +718,5 @@ module.exports = {
   rejectFriendReq,
   cancelFriendReq,
   removeFriend,
+  readArrivedFriendRequst,
 };

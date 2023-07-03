@@ -12,6 +12,10 @@ const friendSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    read: {
+      type: Boolean,
+      default: false,
+    },
     accepted: {
       type: Boolean,
       default: false,

@@ -11,7 +11,7 @@ const searchFunctionalities = require("../controllers/searchFunctionalities");
 const { getAnswerFromGpt } = require("../controllers/chatGptBot");
 const router = express.Router();
 
-/////////// SERVER ROUTES ////////////
+//////////////////////// SERVER ROUTES ////////////////////////////
 router.post(
   "/createServer",
   validateToken,
@@ -33,8 +33,7 @@ router.get(
   serverController.getPublicServers
 );
 
-//////////////////////////////////////////////////////// TEXT CHANNEL ROUTES /////////////////////////////////////////////////////////////////////////
-
+//////////////////////// TEXT CHANNEL ROUTES ////////////////////////////
 router.post(
   "/createTextChannel/:id?",
   validateToken,
@@ -56,7 +55,7 @@ router.get(
   textChannelController.getTextChannel
 );
 
-//////////////////////////////////////////////////////// VOICE CHANNEL ROUTES /////////////////////////////////////////////////////////////////////////
+////////////////////////// VOICE CHANNEL ROUTES ///////////////////////////
 router.post(
   "/createVoiceChannel/:id?",
   validateToken,
@@ -92,8 +91,8 @@ router.get(
   validateToken,
   voiceChannelController.getJoinedInVoiceChannel
 );
-//////////////////////////////////////////////////////// GROUP MESSAGE ROUTES /////////////////////////////////////////////////////////////////////////
 
+///////////////////// GROUP MESSAGE ROUTES /////////////////////////////
 router.get(
   "/getChannelMessages/:id?",
   validateToken,
@@ -125,7 +124,7 @@ router.post(
   GroupMessageController.deletePinnedMessage
 );
 
-///////////////////////// DM ROUTES ///////////////////////////
+///////////////////// DM ROUTES ///////////////////////////
 
 router.post("/addToDm/:id?", validateToken, dmController.addToDmHandler);
 router.post(
@@ -135,7 +134,7 @@ router.post(
 );
 router.get("/getDmFriends", validateToken, dmController.getDmFriends);
 
-//////////////////// ONE TO ONE CHAT ROUTES ///////////////
+////////////////// ONE TO ONE CHAT ROUTES ///////////////
 
 router.get(
   "/getDmMessages/:id?",
@@ -173,7 +172,7 @@ router.get(
   OneToOneChatController.getUnreadMessages
 );
 
-//////////////////////////////////////////////////////// DM ROUTES /////////////////////////////////////////////////////////////////////////
+///////////////////// DM ROUTES ////////////////////////
 
 router.get("/messageFinder/:messages", searchFunctionalities.messagesFinder);
 router.get("/searchServers", searchFunctionalities.searchServers);
