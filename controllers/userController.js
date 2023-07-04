@@ -55,14 +55,25 @@ const registerUser = asyncHandler(async (req, res, next) => {
   const { name, email, password, userImage } = req.body;
   const uniqueCode = await generateUniqueCode();
   const username = name?.split(" ")?.join("")?.trim();
+  let user;
 
-  const user = await User.create({
-    name: username,
-    uniqueCode,
-    email,
-    password,
-    userImage,
-  });
+  if (userImage) {
+    user = await User.create({
+      name: username,
+      uniqueCode,
+      email,
+      password,
+      userImage,
+    });
+  } else {
+    user = await User.create({
+      name: username,
+      uniqueCode,
+      email,
+      password,
+    });
+  }
+  console.log(user);
 
   if (user) {
     const message = `

@@ -3,7 +3,6 @@ const serverController = require("../controllers/serverController");
 const textChannelController = require("../controllers/textChannelController");
 const voiceChannelController = require("../controllers/voiceChannelController");
 const validateToken = require("../middlewares/validateToken");
-const uploadPhoto = require("../middlewares/uploadPhoto");
 const dmController = require("../controllers/DmController");
 const OneToOneChatController = require("../controllers/OneToOneChatController");
 const GroupMessageController = require("../controllers/groupMessageController");
@@ -12,12 +11,7 @@ const { getAnswerFromGpt } = require("../controllers/chatGptBot");
 const router = express.Router();
 
 //////////////////////// SERVER ROUTES ////////////////////////////
-router.post(
-  "/createServer",
-  validateToken,
-  uploadPhoto,
-  serverController.createServer
-);
+router.post("/createServer", validateToken, serverController.createServer);
 router.post("/updateServer/:id?", validateToken, serverController.updateServer);
 router.post("/deleteServer/:id?", validateToken, serverController.deleteServer);
 router.get("/getServer/:id?", validateToken, serverController.getServer);
