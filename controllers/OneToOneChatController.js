@@ -7,7 +7,6 @@ const getDmMessages = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
   const content = req.query.content;
   const regex = new RegExp(content, "i");
-  // const regex = new RegExp(`^(?!http).*${content}.*$`, "i");
 
   const messages = await OneToOneMessage.find({
     content: { $regex: regex },

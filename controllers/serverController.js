@@ -379,10 +379,10 @@ module.exports = {
   createServer,
   updateServer,
   deleteServer,
-  getServer,
-  getJoinedServers,
   joinServer,
   leaveServer,
+  getServer,
   getMembers,
+  getJoinedServers,
   getPublicServers,
 };
