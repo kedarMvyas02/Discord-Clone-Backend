@@ -1,46 +1,103 @@
-normal text chat (friends) api
-    - implement socket.io there too
+# Discord Clone
 
-add user to server api
-    - while adding user to server implement socket.io
+Discord clone is made with MERN stack (MongoDB, Express.js, React.js & Node.js) and made realtime with Socket.io
 
-different text channel chat api
-    - implement socket.io there too
+## Installation
 
-joining voice chat channel api
-    - implement webRTC there for voice
-    - keep api's (optional) implementation of video and screen 
-    
-video chat api
-screen share api
+first of all clone this repo
 
+```bash
+git clone git@github.com:kedarMvyas02/Discord-Clone-Frontend.git
+```
 
+```bash
+git clone git@github.com:kedarMvyas02/Discord-Clone-Backend.git
+```
 
-creating server or channels should also enable socket.io
+then change directory to both backend and frontend in two terminals
 
-// message from discord
-Normal friend conversation
+```bash
+cd frontend
+```
 
-When click a friend name
-io connection start api
-Database message display api
-Database message store api (when clicked send)
-Voice, video screen sharing (when clicked on buttons) 
-Group conversation
+install node modules
 
-When create a group (server) 
-Create a general channel
-Create a general voice channel
+```bash
+npm i
+```
 
+start the application on your localhost
 
-When click a group (server)
-Display by default #general
-Io connection start
-Db msg display
-Db msg store api (when clicked send)
-So in most common cases
-When clicking a channel
-Io connection start
-Db message display api must be called
-When clicked on friend message send, search on user comments of that particular user, show the user whom with user last chatted with
-Implement user and his friends and admin of server can add his frnds in server
+```bash
+npm start
+```
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first
+to discuss what you would like to change.
+
+## Tech Stack
+
+**Client:** React, Redux Toolkit, TailwindCSS
+
+**Server:** Node, Express
+
+**Database:** Mongodb
+
+## Demo
+
+https://discord-clone-kedarmvyas02.vercel.app/
+
+## Authors
+
+- [@kedarMvyas02](https://github.com/kedarMvyas02)
+
+## Environment Variables
+
+To run this project, you will need to add the following environment variables to your .env file in `backend folder`
+
+`PORT`
+
+#### jsonwebtoken (jwt) configurations
+
+`JWT_SALT`
+`JWT_SECRET`
+
+#### mongodb configurations
+
+`CONNECTION_STRING`
+
+#### gmail configurations
+
+`EMAIL_USERNAME`
+`EMAIL_PASSWORD`
+`EMAIL_HOST`
+`EMAIL_PORT`
+
+#### cloudinary configurations
+
+`CLOUDINARY_URL`
+`CLOUD_NAME`
+`CLOUD_API_KEY`
+`CLOUD_API_SECRET`
+
+#### 100ms management token
+
+`MANAGEMENT_TOKEN`
+`APP_ACCESS_KEY`
+`APP_SECRET`
+`TEMPLATE_ID`
+
+#### encryption
+
+`ENCRYPTION_ALGORITHM`
+`ENCRYPTION_SECRET_KEY`
+
+#### open ai api key
+
+`OPENAI_API_KEY`
+
+## 🚀 About Me
+
+I'm a passionate full stack MERN developer...
